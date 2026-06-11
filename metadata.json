@@ -1,0 +1,6 @@
+{
+  "name": "Fluxel Deployment",
+  "description": "Premium Vercel and Apple Liquid Glass style deployment SaaS platform with real Vercel API integration supporting ZIP and GitHub deployments.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
