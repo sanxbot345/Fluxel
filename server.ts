@@ -23,6 +23,19 @@ app.get("/api/health", (req, res) => {
   res.json({ status: "healthy", timestamp: new Date().toISOString() });
 });
 
+// Explicitly serve favicon correctly from the root
+app.get("/favicon.jpg", (req, res) => {
+  const filePath = process.env.NODE_ENV === 'production' 
+    ? path.join(process.cwd(), 'dist', 'favicon.jpg')
+    : path.join(process.cwd(), 'public', 'favicon.jpg');
+    
+  if (fs.existsSync(filePath)) {
+    res.sendFile(filePath);
+  } else {
+    res.status(404).send('Not Found');
+  }
+});
+
 // Helper: Resolve Vercel Token from environment script or headers
 function resolveVercelToken(authorizationHeader?: string): string {
   if (process.env.VERCEL_TOKEN && process.env.VERCEL_TOKEN.trim() !== "") {
