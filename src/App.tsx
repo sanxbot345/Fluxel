@@ -17,6 +17,7 @@ export default function App() {
   // Vercel token is securely managed on the backend script level
   const [token] = useState<string>("script_token");
 
+  const [activeTab, setActiveTab] = useState<"deploy">("deploy");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isDisclaimerOpen, setIsDisclaimerOpen] = useState(false);
   const [toasts, setToasts] = useState<ToastItem[]>([]);
@@ -247,17 +248,17 @@ export default function App() {
       <ParticleBackground />
 
       {/* Sidebar Layout */}
-      <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+      <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} activeTab={activeTab} setActiveTab={setActiveTab} />
 
       {/* Main Dashboard Panel layout */}
-      <main className={`relative flex-1 pt-6 sm:pt-12 md:pt-16 pb-8 px-4 md:px-8 lg:px-16 max-w-7xl flex flex-col gap-4 md:gap-8 z-10 w-full min-h-screen supports-[min-height:100dvh]:min-h-[100dvh] transition-all duration-300 ${isSidebarOpen ? 'lg:ml-64' : 'ml-0'}`}>
-        {/* Glowing Aurora Banner Header */}
-        <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 py-2 sm:py-4 rounded-xl border-0 relative">
-          <div className="flex flex-col">
-            <div className="flex items-center gap-3 mb-2 sm:mb-4">
+      <main className={`relative flex-1 w-full min-h-screen transition-all duration-300 z-10 ${isSidebarOpen ? 'lg:pl-64' : 'pl-0'}`}>
+        <div className="max-w-7xl mx-auto px-4 md:px-8 lg:px-12 xl:px-16 pt-6 sm:pt-12 md:pt-16 pb-8 flex flex-col gap-4 md:gap-8 w-full">
+          {/* Main Top control bar (Persistent Sidebar Toggle and Sparkles, consistent across all tabs) */}
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center gap-3">
               <button
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                className="p-1.5 rounded-xl bg-stone-900 border border-white/5 hover:bg-stone-850 text-stone-400 hover:text-white transition-all shadow-inner"
+                className="p-1.5 rounded-xl bg-stone-900 border border-white/5 hover:bg-stone-850 text-stone-400 hover:text-white transition-all shadow-inner cursor-pointer"
                 title="Toggle Sidebar"
               >
                 <Menu className="w-4 h-4" />
@@ -265,73 +266,73 @@ export default function App() {
               <div className="flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-emerald-400 animate-pulse" />
                 <span className="text-[10px] font-mono font-semibold tracking-wider text-emerald-400 uppercase">
-                  {t.serverEngines}
+                  {activeTab === "deploy" ? t.serverEngines : "FLUXEL EDGE SYSTEM"}
                 </span>
               </div>
             </div>
-            <AnimatedHeroText 
-              title={t.heroTitle} 
-              description={t.heroDesc} 
-            />
+
+            {activeTab === "deploy" && (
+              <button
+                onClick={() => setIsDisclaimerOpen(true)}
+                className="flex items-center gap-2 px-4 py-2 text-xs font-mono font-medium text-amber-400 hover:text-amber-300 bg-amber-500/10 hover:bg-amber-500/15 border border-amber-500/20 hover:border-amber-500/35 shadow-lg shadow-amber-500/5 transition-all cursor-pointer active:scale-95 duration-150"
+                style={{ borderRadius: "100px" }}
+                id="disclaimer-button"
+              >
+                <Info className="w-3.5 h-3.5 text-amber-400" />
+                <span>{t.disclaimerBtn}</span>
+              </button>
+            )}
           </div>
 
-          {/* Right part: Disclaimer Button (Radius 100px) */}
-          <div className="flex items-center md:self-start mt-2 md:mt-0">
-            <button
-              onClick={() => setIsDisclaimerOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 text-xs font-mono font-medium text-amber-400 hover:text-amber-300 bg-amber-500/10 hover:bg-amber-500/15 border border-amber-500/20 hover:border-amber-500/35 shadow-lg shadow-amber-500/5 transition-all cursor-pointer active:scale-95 duration-150"
-              style={{ borderRadius: "100px" }}
-              id="disclaimer-button"
-            >
-              <Info className="w-3.5 h-3.5 text-amber-400" />
-              <span>{t.disclaimerBtn}</span>
-            </button>
+          <AnimatedHeroText 
+            title={t.heroTitle} 
+            description={t.heroDesc} 
+          />
+
+          {/* Real-time Scoreboard metrics */}
+          <AnalyticsPanel analytics={analytics} />
+
+          {/* Dashboard Actions Grid Splitter */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-8 items-start w-full">
+            {/* Left: Dispatcher Form panels (5 columns size) */}
+            <section className="lg:col-span-12 xl:col-span-5 rounded-3xl liquid-glass p-4 sm:p-6 md:p-8 border border-white/5 shadow-2xl bg-black/20">
+              <DeployZipForm
+                token={token}
+                onDeployStart={handleDeployStart}
+                onDeploySuccess={handleDeploySuccess}
+                onDeployError={handleDeployError}
+                addToast={addToast}
+              />
+            </section>
+
+            {/* Right: History registries list (7 columns size) */}
+            <section className="lg:col-span-12 xl:col-span-7 flex flex-col gap-4">
+              <div className="flex items-center justify-between px-1">
+                <h3 className="font-display font-semibold text-white text-base tracking-wide flex items-center gap-2">
+                  {t.activePipelinesTitle}
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-stone-900 text-stone-500 border border-white/5 font-medium leading-none">
+                    {history.length} {t.activePipelinesStatus}
+                  </span>
+                </h3>
+              </div>
+
+              <DeploymentList
+                items={history}
+                token={token}
+                onViewLogs={setSelectedConsoleItem}
+                onDeleteItem={handleDeleteItem}
+                onRefreshItem={handleRefreshItem}
+                addToast={addToast}
+              />
+            </section>
           </div>
-        </header>
 
-        {/* Real-time Scoreboard metrics */}
-        <AnalyticsPanel analytics={analytics} />
-
-        {/* Dashboard Actions Grid Splitter */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-8 items-start w-full">
-          {/* Left: Dispatcher Form panels (5 columns size) */}
-          <section className="lg:col-span-12 xl:col-span-5 rounded-3xl liquid-glass p-4 sm:p-6 md:p-8 border border-white/5 shadow-2xl bg-black/20">
-            <DeployZipForm
-              token={token}
-              onDeployStart={handleDeployStart}
-              onDeploySuccess={handleDeploySuccess}
-              onDeployError={handleDeployError}
-              addToast={addToast}
-            />
-          </section>
-
-          {/* Right: History registries list (7 columns size) */}
-          <section className="lg:col-span-12 xl:col-span-7 flex flex-col gap-4">
-            <div className="flex items-center justify-between px-1">
-              <h3 className="font-display font-semibold text-white text-base tracking-wide flex items-center gap-2">
-                {t.activePipelinesTitle}
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-stone-900 text-stone-500 border border-white/5 font-medium leading-none">
-                  {history.length} {t.activePipelinesStatus}
-                </span>
-              </h3>
-            </div>
-
-            <DeploymentList
-              items={history}
-              token={token}
-              onViewLogs={setSelectedConsoleItem}
-              onDeleteItem={handleDeleteItem}
-              onRefreshItem={handleRefreshItem}
-              addToast={addToast}
-            />
-          </section>
+          {/* Footer */}
+          <footer className="mt-8 text-center text-stone-600 text-xs py-4 border-t border-white/5">
+            <p className="mb-1">© 2026 Fluxel Studio. All rights reserved.</p>
+            <p>Fluxell Deployment is developed and maintained by Fluxel Studio.</p>
+          </footer>
         </div>
-
-        {/* Footer */}
-        <footer className="mt-8 text-center text-stone-600 text-xs py-4 border-t border-white/5">
-          <p className="mb-1">© 2026 Fluxel Studio. All rights reserved.</p>
-          <p>Fluxell Deployment is developed and maintained by Fluxel Studio.</p>
-        </footer>
       </main>
 
       {/* Universal Floating Modals */}

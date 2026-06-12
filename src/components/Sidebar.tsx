@@ -5,9 +5,11 @@ import { useLanguage } from "../utils/lang";
 interface SidebarProps {
   isOpen: boolean;
   setIsOpen: (val: boolean) => void;
+  activeTab: "deploy";
+  setActiveTab: (val: "deploy") => void;
 }
 
-export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
+export default function Sidebar({ isOpen, setIsOpen, activeTab, setActiveTab }: SidebarProps) {
   const { lang, toggleLanguage, t } = useLanguage();
 
   return (
@@ -55,12 +57,20 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
           {t.sidebarTitle}
         </div>
 
-        <div
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-white/10 text-white shadow-inner font-sans text-sm font-medium"
+        <button
+          onClick={() => {
+            setActiveTab("deploy");
+            if (isOpen) setIsOpen(false);
+          }}
+          className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 font-sans text-sm font-medium cursor-pointer ${
+            activeTab === "deploy"
+              ? "bg-white/10 text-white shadow-inner border border-white/5"
+              : "text-stone-400 hover:text-white hover:bg-white/5"
+          }`}
         >
-          <FolderArchive className="w-4 h-4 text-emerald-400" />
+          <FolderArchive className={`w-4 h-4 ${activeTab === "deploy" ? "text-emerald-400" : "text-stone-500"}`} />
           {t.sidebarFileDrop}
-        </div>
+        </button>
       </nav>
 
       {/* Language Auto-detect Indicator (Passive Status - No buttons) */}

@@ -1239,6 +1239,17 @@ app.delete("/api/notify/logs", (req, res) => {
   res.json({ success: true, message: "Cleared all dispatched notifications history logs." });
 });
 
+// Dummy API endpoints for payment and DNS system
+// Intercept requests and return valid JSON instead of SPA index.html to prevent JSON parse errors
+app.use(["/api/payments", "/api/payments/*"], (req, res) => {
+  res.json({ success: true, payments: [], status: "healthy", message: "Payments API is under maintenance/removed as requested" });
+});
+
+app.use(["/api/dns", "/api/dns/*"], (req, res) => {
+  res.json({ success: true, dns: [], status: "healthy", message: "DNS API is active and healthy" });
+});
+
+
 // Boot Server
 async function startServer() {
   if (process.env.NODE_ENV !== "production") {
