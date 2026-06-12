@@ -1253,6 +1253,15 @@ async function startServer() {
     // Serve production static assets compiled into dist/
     const distPath = path.join(process.cwd(), "dist");
     app.use(express.static(distPath));
+
+    app.get("/sitemap.xml", (req, res) => {
+      res.sendFile(path.join(distPath, "sitemap.xml"));
+    });
+
+    app.get("/robots.txt", (req, res) => {
+      res.sendFile(path.join(distPath, "robots.txt"));
+    });
+    
     app.get("*", (req, res) => {
       res.sendFile(path.join(distPath, "index.html"));
     });
