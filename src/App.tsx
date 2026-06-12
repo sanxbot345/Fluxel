@@ -325,6 +325,22 @@ export default function App() {
             />
           </section>
         </div>
+
+        {/* About Section */}
+        <section className="mt-12 md:mt-20 p-6 md:p-8 rounded-3xl liquid-glass border border-white/5 bg-stone-950/40">
+          <h2 className="text-lg font-display font-semibold text-white mb-4">About Fluxel Studio</h2>
+          <p className="text-stone-400 text-sm leading-relaxed max-w-3xl">
+            Fluxel Studio is an independent software studio founded in 2026. 
+            We focus on building modern developer tools and premium cloud technologies. 
+            Fluxell Deployment is one of the products developed and maintained by Fluxel Studio.
+          </p>
+        </section>
+
+        {/* Footer */}
+        <footer className="mt-8 text-center text-stone-600 text-xs py-4 border-t border-white/5">
+          <p className="mb-1">© 2026 Fluxel Studio. All rights reserved.</p>
+          <p>Fluxell Deployment is developed and maintained by Fluxel Studio.</p>
+        </footer>
       </main>
 
       {/* Universal Floating Modals */}

@@ -1,0 +1,6 @@
+© 2026 Fluxel Studio. All rights reserved.
+
+Proprietary Software License.
+Fluxell Deployment is developed and maintained by Fluxel Studio.
+No part of this software may be reproduced, distributed, or transmitted in any form 
+or by any means without the prior written permission of Fluxel Studio.
