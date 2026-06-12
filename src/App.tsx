@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Sparkles, Activity, Menu, Info, X } from "lucide-react";
+import { Sparkles, Activity, Menu, Info, X, ChevronRight, Shield } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { DeploymentHistoryItem, DeploymentState, ProjectAnalytics } from "./types";
 import ParticleBackground from "./components/ParticleBackground";
@@ -75,7 +75,7 @@ export default function App() {
     };
 
     setHistory((prev) => [historyItem, ...prev]);
-    addToast(`${t.successfullyQueued} ${newDeploy.name}!`, "success");
+    addToast(`${t.successfullyQueued} ${finalUrl}!`, "success");
   };
 
   const handleDeployError = (errMessage: string) => {
@@ -122,11 +122,12 @@ export default function App() {
                     if (data.alias && Array.isArray(data.alias) && data.alias.length > 0) {
                       fetchedUrl = data.alias[0];
                     }
-                    const updated = { ...h, readyState: data.readyState as DeploymentState, url: fetchedUrl || h.url };
+                    const displayUrl = fetchedUrl || h.url;
+                    const updated = { ...h, readyState: data.readyState as DeploymentState, url: displayUrl };
                     if (data.readyState === DeploymentState.READY) {
-                      addToast(`Build Completed! "${h.name}" is now online!`, "success");
+                      addToast(`Build Completed! "${displayUrl}" is now online!`, "success");
                     } else if (data.readyState === DeploymentState.ERROR) {
-                      addToast(`Build Failed: error during compiling "${h.name}".`, "error");
+                      addToast(`Build Failed: error during compiling "${displayUrl}".`, "error");
                     }
                     return updated;
                   }
@@ -326,16 +327,6 @@ export default function App() {
           </section>
         </div>
 
-        {/* About Section */}
-        <section className="mt-12 md:mt-20 p-6 md:p-8 rounded-3xl liquid-glass border border-white/5 bg-stone-950/40">
-          <h2 className="text-lg font-display font-semibold text-white mb-4">About Fluxel Studio</h2>
-          <p className="text-stone-400 text-sm leading-relaxed max-w-3xl">
-            Fluxel Studio is an independent software studio founded in 2026. 
-            We focus on building modern developer tools and premium cloud technologies. 
-            Fluxell Deployment is one of the products developed and maintained by Fluxel Studio.
-          </p>
-        </section>
-
         {/* Footer */}
         <footer className="mt-8 text-center text-stone-600 text-xs py-4 border-t border-white/5">
           <p className="mb-1">© 2026 Fluxel Studio. All rights reserved.</p>
@@ -404,66 +395,93 @@ export default function App() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="absolute inset-0 bg-black/85 backdrop-blur-md"
+              transition={{ duration: 0.18, ease: "easeOut" }}
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
               onClick={() => setIsDisclaimerOpen(false)}
             />
             <motion.div 
-              initial={{ opacity: 0, scale: 0.85 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.85 }}
-              transition={{ type: "spring", damping: 25, stiffness: 350, duration: 0.25 }}
-              className="relative w-full max-w-lg p-6 sm:p-8 rounded-2xl border border-white/10 bg-stone-950/95 shadow-2xl backdrop-blur-xl liquid-glass"
+              initial={{ opacity: 0, scale: 0.94, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.94, y: 15 }}
+              transition={{ type: "tween", ease: [0.16, 1, 0.3, 1], duration: 0.3 }}
+              className="relative w-full max-w-lg p-6 sm:p-8 rounded-3xl border border-white/10 bg-stone-950 shadow-2xl overflow-hidden"
               style={{
-                boxShadow: "0 24px 60px rgba(0,0,0,0.95), inset 0 1px 0 rgba(255,255,255,0.15)",
+                boxShadow: "0 24px 60px rgba(0,0,0,0.95), inset 0 1px 0 rgba(255,255,255,0.12)",
               }}
             >
               <button
                 onClick={() => setIsDisclaimerOpen(false)}
-                className="absolute top-4 right-4 p-1 rounded-lg bg-stone-900 border border-white/5 hover:bg-stone-850 text-stone-400 hover:text-white transition-all duration-150"
+                className="absolute top-5 right-5 p-1.5 rounded-xl bg-stone-900 border border-white/5 hover:bg-stone-850 text-stone-400 hover:text-white transition-all duration-150 cursor-pointer active:scale-95"
                 title="Close Modal"
               >
                 <X className="w-4 h-4" />
               </button>
 
               {/* Design header */}
-              <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center mb-5 shadow-inner">
-                <Info className="w-5 h-5" />
+              <div className="flex items-center gap-4 mb-5 border-b border-white/5 pb-4">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center shadow-inner">
+                  <Shield className="w-5 h-5 text-amber-400" />
+                </div>
+                <div>
+                  <h4 className="font-display font-semibold text-base sm:text-lg text-white leading-tight">
+                    {t.disclaimerTitle}
+                  </h4>
+                  <span className="text-[10px] font-mono text-amber-500/80 tracking-wider uppercase">System Protocol Protection</span>
+                </div>
               </div>
               
-              <h4 className="font-display font-semibold text-lg text-white mb-2 tracking-wide flex items-center gap-2">
-                {t.disclaimerTitle}
-              </h4>
-              
-              <div className="text-stone-300 text-xs sm:text-sm mb-6 space-y-4 max-h-[60vh] overflow-y-auto pr-1 leading-relaxed">
-                <p>
+              <div className="text-stone-300 text-xs sm:text-sm mb-6 space-y-4 max-h-[50vh] overflow-y-auto pr-2 leading-relaxed">
+                <p className="text-stone-300 font-sans text-sm">
                   {t.disclaimerText1}
                 </p>
                 
-                <div className="p-3 bg-amber-500/5 rounded-xl border border-amber-500/15 text-amber-300 text-xs flex flex-col gap-1.5 font-sans">
-                  <span className="font-semibold block text-amber-400">{t.disclaimerSupportTitle}</span>
-                  <span>
+                <div className="p-3.5 bg-amber-500/[0.03] rounded-2xl border border-amber-500/10 text-amber-300 text-xs flex flex-col gap-1.5 font-sans">
+                  <span className="font-semibold block text-amber-400 flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                    {t.disclaimerSupportTitle}
+                  </span>
+                  <span className="text-amber-300/80 leading-relaxed">
                     {t.disclaimerSupportDesc}
                   </span>
                 </div>
 
-                <ul className="space-y-2.5 list-disc pl-5 text-stone-400 text-xs list-outside">
-                  <li>
-                    <strong className="text-stone-200">{t.disclaimerPoint1Title}</strong> {t.disclaimerPoint1Desc}
-                  </li>
-                  <li>
-                    <strong className="text-stone-200">{t.disclaimerPoint2Title}</strong> {t.disclaimerPoint2Desc}
-                  </li>
-                  <li>
-                    <strong className="text-stone-200">{t.disclaimerPoint3Title}</strong> {t.disclaimerPoint3Desc}
-                  </li>
-                </ul>
+                <div className="space-y-3 pt-2">
+                  <div className="flex gap-3.5 items-start p-3.5 rounded-2xl border border-white/5 bg-stone-900/20 hover:bg-stone-900/40 transition-colors">
+                    <div className="mt-0.5 p-1 rounded-lg bg-stone-900 border border-white/5 text-amber-500 shrink-0">
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </div>
+                    <div>
+                      <strong className="text-stone-200 text-xs tracking-wide block mb-0.5">{t.disclaimerPoint1Title}</strong>
+                      <span className="text-stone-400 text-xs leading-relaxed block">{t.disclaimerPoint1Desc}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3.5 items-start p-3.5 rounded-2xl border border-white/5 bg-stone-900/20 hover:bg-stone-900/40 transition-colors">
+                    <div className="mt-0.5 p-1 rounded-lg bg-stone-900 border border-white/5 text-amber-500 shrink-0">
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </div>
+                    <div>
+                      <strong className="text-stone-200 text-xs tracking-wide block mb-0.5">{t.disclaimerPoint2Title}</strong>
+                      <span className="text-stone-400 text-xs leading-relaxed block">{t.disclaimerPoint2Desc}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3.5 items-start p-3.5 rounded-2xl border border-white/5 bg-stone-900/20 hover:bg-stone-900/40 transition-colors">
+                    <div className="mt-0.5 p-1 rounded-lg bg-stone-900 border border-white/5 text-amber-500 shrink-0">
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </div>
+                    <div>
+                      <strong className="text-stone-200 text-xs tracking-wide block mb-0.5">{t.disclaimerPoint3Title}</strong>
+                      <span className="text-stone-400 text-xs leading-relaxed block">{t.disclaimerPoint3Desc}</span>
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <div className="flex justify-end gap-3">
+              <div className="flex justify-end gap-3 pt-2 border-t border-white/5">
                 <button
                   onClick={() => setIsDisclaimerOpen(false)}
-                  className="w-full sm:w-auto px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-stone-950 text-xs font-semibold rounded-xl shadow-lg shadow-amber-500/20 hover:shadow-amber-500/30 transition-all border border-amber-400/20 font-mono tracking-wider text-center"
+                  className="w-full px-5 py-3 bg-amber-500 hover:bg-amber-400 text-stone-950 text-xs font-bold rounded-2xl shadow-lg shadow-amber-500/10 hover:shadow-amber-500/20 transition-all border border-amber-400/20 font-mono tracking-wider text-center cursor-pointer active:scale-[0.98]"
                 >
                   {t.disclaimerUnderstand}
                 </button>

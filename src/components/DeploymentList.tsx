@@ -167,9 +167,15 @@ export default function DeploymentList({
               <div className="mt-1">{getFrameworkLogo(item.framework)}</div>
               <div className="flex-1 min-w-0">
                 <div className="flex flex-wrap items-center gap-2.5">
-                  <h4 className="font-display font-semibold text-white tracking-wide truncate max-w-xs md:max-w-md">
-                    {item.name}
-                  </h4>
+                  <a
+                    href={deploymentUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-display font-semibold text-white hover:text-emerald-400 transition-colors tracking-wide truncate max-w-xs md:max-w-md flex items-center gap-1.5 group/title"
+                  >
+                    <span>{item.url}</span>
+                    <ExternalLink className="w-3.5 h-3.5 opacity-50 group-hover/title:opacity-100 text-stone-400 group-hover/title:text-emerald-400 transition-colors" />
+                  </a>
                   {getStatusBadge(item.readyState)}
                   {item.target === "render" ? (
                     <span className="px-2 py-0.5 rounded-md bg-[#6c5bfa]/10 border border-[#6c5bfa]/20 text-[10px] font-bold text-[#6c5bfa] uppercase tracking-widest shadow-sm">
@@ -192,15 +198,9 @@ export default function DeploymentList({
                 </div>
 
                 <div className="flex flex-wrap items-center gap-y-1.5 gap-x-4 text-[11.5px] font-mono text-stone-500 mt-2">
-                  <a
-                    href={deploymentUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:text-stone-300 transition-colors flex items-center gap-1 group/link truncate"
-                  >
-                    <span>{item.url}</span>
-                    <ExternalLink className="w-3 h-3 opacity-60 group-hover/link:opacity-100" />
-                  </a>
+                  <span className="px-2 py-0.5 rounded bg-stone-950 border border-white/5 text-[10.5px]">
+                    Project: {item.name}
+                  </span>
 
                   <span className="flex items-center gap-1 select-none">
                     <Calendar className="w-3.5 h-3.5 opacity-60" />
