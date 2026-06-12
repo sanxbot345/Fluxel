@@ -1,12 +1,14 @@
 import React from "react";
 import { Layers, CheckCircle2, XCircle, TrendingUp } from "lucide-react";
 import { ProjectAnalytics } from "../types";
+import { useLanguage } from "../utils/lang";
 
 interface AnalyticsPanelProps {
   analytics: ProjectAnalytics;
 }
 
 export default function AnalyticsPanel({ analytics }: AnalyticsPanelProps) {
+  const { t } = useLanguage();
   const successRate =
     analytics.total > 0 ? Math.round((analytics.success / analytics.total) * 100) : 0;
 
@@ -17,7 +19,7 @@ export default function AnalyticsPanel({ analytics }: AnalyticsPanelProps) {
         <div className="absolute inset-0 bg-gradient-to-br from-white/2 to-transparent pointer-events-none" />
         <div className="flex items-center justify-between mb-3">
           <span className="text-xs font-mono font-medium tracking-wider text-stone-500 uppercase">
-            Total Deployments
+            {t.totalDeploys}
           </span>
           <div className="p-2 rounded-xl bg-stone-900/50 border border-white/5 text-stone-400 group-hover:text-white transition-colors">
             <Layers className="w-4 h-4" />
@@ -28,7 +30,7 @@ export default function AnalyticsPanel({ analytics }: AnalyticsPanelProps) {
             {analytics.total}
           </h4>
           <span className="text-[11px] text-stone-400 flex items-center gap-1">
-            Cloud pipelines initiated
+            {t.totalDeploysDesc}
           </span>
         </div>
       </div>
@@ -38,7 +40,7 @@ export default function AnalyticsPanel({ analytics }: AnalyticsPanelProps) {
         <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/2 to-transparent pointer-events-none" />
         <div className="flex items-center justify-between mb-3">
           <span className="text-xs font-mono font-medium tracking-wider text-stone-500 uppercase">
-            Successful Build
+            {t.successfulBuild}
           </span>
           <div className="p-2 rounded-xl bg-emerald-950/20 border border-emerald-500/10 text-emerald-500 group-hover:text-emerald-400 transition-colors">
             <CheckCircle2 className="w-4 h-4" />
@@ -49,7 +51,7 @@ export default function AnalyticsPanel({ analytics }: AnalyticsPanelProps) {
             {analytics.success}
           </h4>
           <span className="text-[11px] text-stone-400 flex items-center gap-1">
-            Active online websites
+            {t.successfulBuildDesc}
           </span>
         </div>
       </div>
@@ -59,7 +61,7 @@ export default function AnalyticsPanel({ analytics }: AnalyticsPanelProps) {
         <div className="absolute inset-0 bg-gradient-to-br from-rose-500/2 to-transparent pointer-events-none" />
         <div className="flex items-center justify-between mb-3">
           <span className="text-xs font-mono font-medium tracking-wider text-stone-500 uppercase">
-            Build Failures
+            {t.buildFailures}
           </span>
           <div className="p-2 rounded-xl bg-rose-950/20 border border-rose-500/10 text-rose-500 group-hover:text-rose-400 transition-colors">
             <XCircle className="w-4 h-4" />
@@ -70,7 +72,7 @@ export default function AnalyticsPanel({ analytics }: AnalyticsPanelProps) {
             {analytics.failed}
           </h4>
           <span className="text-[11px] text-stone-400 flex items-center gap-1">
-            Errors captured during compilation
+            {t.buildFailuresDesc}
           </span>
         </div>
       </div>
@@ -80,7 +82,7 @@ export default function AnalyticsPanel({ analytics }: AnalyticsPanelProps) {
         <div className="absolute inset-0 bg-gradient-to-br from-blue-500/2 to-transparent pointer-events-none" />
         <div className="flex items-center justify-between mb-3">
           <span className="text-xs font-mono font-medium tracking-wider text-stone-500 uppercase">
-            Pipeline Health Ratio
+            {t.healthRatio}
           </span>
           <div className="p-2 rounded-xl bg-blue-950/20 border border-blue-500/10 text-blue-500 group-hover:text-blue-400 transition-colors">
             <TrendingUp className="w-4 h-4" />
@@ -91,7 +93,7 @@ export default function AnalyticsPanel({ analytics }: AnalyticsPanelProps) {
             {successRate}%
           </h4>
           <span className="text-[11px] text-stone-400 flex items-center gap-1">
-            Production-ready probability
+            {t.healthRatioDesc}
           </span>
         </div>
       </div>

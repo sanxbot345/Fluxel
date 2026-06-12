@@ -1,5 +1,6 @@
 import React from "react";
-import { FolderArchive, Activity, X } from "lucide-react";
+import { FolderArchive, Activity, X, Languages } from "lucide-react";
+import { useLanguage } from "../utils/lang";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -7,6 +8,8 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
+  const { lang, toggleLanguage, t } = useLanguage();
+
   return (
     <>
       {/* Mobile Overlay Background */}
@@ -19,12 +22,12 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
 
       {/* Sidebar Panel */}
       <aside 
-        className={`w-64 fixed top-0 left-0 h-screen bg-black/80 backdrop-blur-3xl border-r border-white/5 flex flex-col z-50 transition-transform duration-300 ease-in-out ${
+        className={`w-64 fixed top-0 left-0 h-screen bg-black/80 backdrop-blur-3xl border-r border-r-white/5 flex flex-col z-50 transition-transform duration-300 ease-in-out ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         {/* Brand Logo */}
-        <div className="h-20 flex items-center justify-between px-6 border-b border-white/5">
+        <div className="h-20 flex items-center justify-between px-6 border-b border-b-white/5">
           <div className="flex items-center gap-3 w-full">
             <div className="relative">
               <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 p-0.5 shadow-lg shadow-emerald-500/20">
@@ -49,24 +52,42 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
       {/* Navigation */}
       <nav className="flex-1 py-8 px-4 flex flex-col gap-2">
         <div className="text-[10px] font-mono text-stone-500 font-semibold uppercase tracking-widest px-4 mb-2">
-          Deployment
+          {t.sidebarTitle}
         </div>
 
         <div
           className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-white/10 text-white shadow-inner font-sans text-sm font-medium"
         >
           <FolderArchive className="w-4 h-4 text-emerald-400" />
-          File Drop
+          {t.sidebarFileDrop}
         </div>
       </nav>
 
+      {/* Language Auto-detect Indicator (Passive Status - No buttons) */}
+      <div className="p-4 mx-4 mb-2 rounded-xl bg-white/[0.02] border border-white/5 font-sans">
+        <div className="flex items-center gap-2 mb-1.5 text-stone-400">
+          <Languages className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+          <span className="text-[10px] font-mono font-semibold uppercase tracking-wider text-stone-400">
+            {lang === "id" ? "Bahasa Sistem" : "System Language"}
+          </span>
+        </div>
+        <div className="flex items-center justify-between px-2 py-1.5 bg-stone-900 border border-white/5 rounded-lg">
+          <span className="text-xs text-stone-300 font-medium flex items-center gap-1.5">
+            {lang === "id" ? "🇮🇩 Indonesia" : "🇬🇧 English"}
+          </span>
+          <span className="text-[8px] font-mono font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded-full border border-emerald-500/10">
+            AUTO
+          </span>
+        </div>
+      </div>
+
       {/* Footer System Status */}
-      <div className="p-6 mt-auto border-t border-white/5">
+      <div className="p-6 mt-auto border-t border-t-white/5">
         <div className="flex items-center gap-3 px-4 py-3 bg-white/5 rounded-xl border border-white/5">
           <Activity className="w-4 h-4 text-emerald-400 animate-pulse" />
           <div className="flex flex-col">
             <span className="text-[11px] font-mono text-stone-300">Vercel API</span>
-            <span className="text-[10px] text-emerald-500">Connected</span>
+            <span className="text-[10px] text-emerald-500">{t.statusOnline}</span>
           </div>
         </div>
       </div>

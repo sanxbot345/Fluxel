@@ -2,6 +2,7 @@ import React, { useState, useRef } from "react";
 import { UploadCloud, FileArchive, FileCode, FileText, FileJson, File, CheckCircle2, AlertCircle, HelpCircle } from "lucide-react";
 import FrameworkDropdown from "./FrameworkDropdown";
 import JSZip from "jszip";
+import { useLanguage } from "../utils/lang";
 
 const getFileIcon = (fileName: string) => {
   const ext = fileName.split('.').pop()?.toLowerCase() || '';
@@ -63,6 +64,7 @@ export default function DeployZipForm({
   onDeployError,
   addToast,
 }: DeployZipFormProps) {
+  const { t } = useLanguage();
   const [projectName, setProjectName] = useState("");
   const [framework, setFramework] = useState("detect");
   const [files, setFiles] = useState<File[]>([]);
@@ -178,11 +180,11 @@ export default function DeployZipForm({
   const submitDeploy = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!token) {
-      addToast("Please authorize/connect your Vercel Token first.", "error");
+      addToast(t.authRequired, "error");
       return;
     }
     if (files.length === 0) {
-      addToast("Please upload or drag & drop project files.", "error");
+      addToast(t.uploadFilesRequired, "error");
       return;
     }
 
@@ -234,7 +236,7 @@ export default function DeployZipForm({
       setProgress(100);
       setTimeout(() => {
         onDeploySuccess({ ...(data || {}), sourceType: "zip", target: "vercel" });
-        addToast("Pipeline uploaded. Starting compilation...", "success");
+        addToast(t.uploadedStarting, "success");
         setFiles([]);
         setProjectName("");
         setDeploying(false);
@@ -258,12 +260,12 @@ export default function DeployZipForm({
         {/* Project Name */}
         <div className="flex flex-col gap-2">
           <label className="text-xs font-mono font-medium tracking-wide text-stone-400 uppercase">
-            Project Domain Name
+            {t.projDomainName}
           </label>
           <input
             type="text"
             required
-            placeholder="e.g. fluxel-next-app"
+            placeholder={t.placeholderName}
             value={projectName}
             onChange={(e) =>
               setProjectName(
@@ -277,10 +279,10 @@ export default function DeployZipForm({
         {/* Framework Selector */}
         <div className="flex flex-col gap-2">
           <label className="text-xs font-mono font-medium tracking-wide text-stone-400 uppercase flex items-center gap-1.5">
-            Framework Target
+            {t.frameworkTarget}
             <span
               className="text-[10px] text-stone-500 cursor-help"
-              title="Select framework or Auto-Detect for standard projects."
+              title={t.helpFramework}
             >
               <HelpCircle className="w-3.5 h-3.5" />
             </span>
@@ -326,7 +328,7 @@ export default function DeployZipForm({
               ))}
             </div>
             <span className="text-[10px] sm:text-[11px] font-mono text-stone-500 mt-0.5">
-              {files.length} file(s) • {(files.reduce((acc, f) => acc + f.size, 0) / (1024 * 1024)).toFixed(2)} MB • Ready to dispatch
+              {files.length} {t.readyToDispatch} • {(files.reduce((acc, f) => acc + f.size, 0) / (1024 * 1024)).toFixed(2)} MB
             </span>
           </div>
         ) : (
@@ -335,10 +337,10 @@ export default function DeployZipForm({
               <UploadCloud className="w-4 h-4 md:w-5 h-5" />
             </div>
             <span className="font-sans text-xs sm:text-sm font-semibold text-stone-300">
-              Drag & drop standard ZIP, HTML, CSS, JS, JAVA, XML, or any source files here
+              {t.dragDropFiles}
             </span>
             <span className="text-[10px] sm:text-xs text-stone-500 mt-1 md:mt-1.5 leading-relaxed max-w-[280px] md:max-w-none">
-              Accepts HTML webpages, stylesheets, scripts, backend databases or raw code sheets (Max 50MB)
+              {t.dragDropSubtitle}
             </span>
           </div>
         )}
@@ -347,7 +349,7 @@ export default function DeployZipForm({
       {deploying && (
         <div className="flex flex-col gap-2 w-full animate-modal-entrance">
           <div className="flex items-center justify-between text-xs font-mono text-stone-400">
-            <span>Uploading Pipeline Archive...</span>
+            <span>{t.uploadingPipeline}</span>
             <span className="text-emerald-400">{progress}%</span>
           </div>
           <div className="w-full h-1.5 bg-stone-900 border border-white/5 rounded-full overflow-hidden">
@@ -371,10 +373,10 @@ export default function DeployZipForm({
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
             </svg>
-            Sending to Vercel...
+            {t.sendingBtn}
           </>
         ) : (
-          "Deploy Now"
+          t.deployBtn
         )}
       </button>
     </form>
