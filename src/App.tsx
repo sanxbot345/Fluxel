@@ -11,13 +11,9 @@ import DeploymentList from "./components/DeploymentList";
 import ConsoleModal from "./components/ConsoleModal";
 import AnimatedHeroText from "./components/AnimatedHeroText";
 import { useLanguage } from "./utils/lang";
-import { useAuthStore } from "./store/authStore";
-import AuthView from "./components/AuthView";
-import ProfileModal from "./components/ProfileModal";
 
 export default function App() {
   const { lang, toggleLanguage, t } = useLanguage();
-  const { user, isInitialized, initAuthListener } = useAuthStore();
   
   // Vercel token is securely managed on the backend script level
   const [token] = useState<string>("script_token");
@@ -25,8 +21,6 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<"deploy">("deploy");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isDisclaimerOpen, setIsDisclaimerOpen] = useState(false);
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [toasts, setToasts] = useState<ToastItem[]>([]);
   
   // Isolated multi-user deployment archives representation
@@ -38,32 +32,25 @@ export default function App() {
   // Track active item being verified for deletion
   const [itemToDelete, setItemToDelete] = useState<DeploymentHistoryItem | null>(null);
 
-  // Watch Auth Listeners
-  useEffect(() => {
-    const unsubscribe = initAuthListener();
-    return () => unsubscribe();
-  }, [initAuthListener]);
-
-  // Sync and isolate standard user/guest history slots
-  useEffect(() => {
-    try {
-      const key = user ? `fluxel_deploy_history_${user.uid}` : "fluxel_deploy_history_guest";
-      const stored = localStorage.getItem(key);
-      setHistory(stored ? JSON.parse(stored) : []);
-    } catch {
-      setHistory([]);
-    }
-  }, [user]);
-
   // Sync isolated user/guest history back on state modification
   useEffect(() => {
     try {
-      const key = user ? `fluxel_deploy_history_${user.uid}` : "fluxel_deploy_history_guest";
-      localStorage.setItem(key, JSON.stringify(history));
+      const stored = localStorage.getItem("fluxel_deploy_history");
+      if (stored) {
+        setHistory(JSON.parse(stored));
+      }
+    } catch {
+      setHistory([]);
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("fluxel_deploy_history", JSON.stringify(history));
     } catch (e) {
       console.error("Failed to sync history state with localStorage", e);
     }
-  }, [history, user]);
+  }, [history]);
 
   // Toast notifier helper
   const addToast = (message: string, type: "success" | "error" | "info" = "info") => {
@@ -266,21 +253,6 @@ export default function App() {
     }).length,
   };
 
-  if (!isInitialized) {
-    return (
-      <div id="auth-loading-screen" className="relative min-h-screen bg-[#030303] flex flex-col items-center justify-center p-4 overflow-hidden text-stone-200">
-        <ParticleBackground />
-        <div className="relative rounded-3xl border border-white/5 bg-[#0d0d0f]/60 backdrop-blur-3xl px-10 py-8 flex flex-col items-center gap-4 text-center shadow-2xl">
-          <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
-          <div className="space-y-1.5">
-            <h3 className="font-mono text-[10px] font-semibold tracking-widest text-[#93c5fd] uppercase">Synchronizing</h3>
-            <p className="text-[11px] text-stone-400 font-sans leading-relaxed">Connecting to premium auth credentials security grid...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="relative min-h-screen supports-[min-height:100dvh]:min-h-[100dvh] text-stone-200 bg-[#050505] overflow-x-hidden font-sans pb-10 md:pb-20 flex flex-row">
       {/* Visual background elements */}
@@ -292,15 +264,13 @@ export default function App() {
         setIsOpen={setIsSidebarOpen} 
         activeTab={activeTab} 
         setActiveTab={setActiveTab} 
-        onOpenProfile={() => setIsProfileOpen(true)}
-        onOpenAuth={() => setIsAuthOpen(true)}
       />
 
       {/* Main Dashboard Panel layout */}
       <main className={`relative flex-1 w-full min-h-screen transition-all duration-300 z-10 ${isSidebarOpen ? 'lg:pl-64' : 'pl-0'}`}>
-        <div className="max-w-7xl mx-auto px-4 md:px-8 lg:px-12 xl:px-16 pt-6 sm:pt-12 md:pt-16 pb-8 flex flex-col gap-4 md:gap-8 w-full">
+        <div className="max-w-7xl mx-auto flex flex-col gap-4 md:gap-8 w-full pb-8">
           {/* Main Top control bar (Persistent Sidebar Toggle and Sparkles, consistent across all tabs) */}
-          <div className="flex items-center justify-between w-full">
+          <div className="sticky top-0 z-40 bg-[#050505]/80 backdrop-blur-xl px-4 md:px-8 lg:px-12 xl:px-16 pt-6 sm:pt-12 md:pt-16 pb-4 flex items-center justify-between w-full border-b border-white/5">
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -329,11 +299,12 @@ export default function App() {
               </button>
             )}
           </div>
-
-          <AnimatedHeroText 
-            title={t.heroTitle} 
-            description={t.heroDesc} 
-          />
+          
+          <div className="flex flex-col gap-4 md:gap-8 px-4 md:px-8 lg:px-12 xl:px-16 w-full">
+            <AnimatedHeroText 
+              title={t.heroTitle} 
+              description={t.heroDesc} 
+            />
 
           {/* Real-time Scoreboard metrics */}
           <AnalyticsPanel analytics={analytics} />
@@ -344,8 +315,6 @@ export default function App() {
             <section className="lg:col-span-12 xl:col-span-5 rounded-3xl liquid-glass p-4 sm:p-6 md:p-8 border border-white/5 shadow-2xl bg-black/20">
               <DeployZipForm
                 token={token}
-                user={user}
-                onOpenAuth={() => setIsAuthOpen(true)}
                 onDeployStart={handleDeployStart}
                 onDeploySuccess={handleDeploySuccess}
                 onDeployError={handleDeployError}
@@ -373,6 +342,7 @@ export default function App() {
                 addToast={addToast}
               />
             </section>
+          </div>
           </div>
 
           {/* Footer */}
@@ -542,12 +512,6 @@ export default function App() {
 
       {/* Push Notifier Container */}
       <Toast toasts={toasts} setToasts={setToasts} />
-
-      {/* User Account Config Overlay */}
-      <ProfileModal isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} addToast={addToast} />
-
-      {/* Glassmorphism Auth Modal */}
-      <AuthView isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} addToast={addToast} />
     </div>
   );
 }

@@ -197,21 +197,11 @@ function normalizeReadyState(state: string | undefined | null): string {
   return "ERROR";
 }
 
-// Helper: Clean deployment URL hash strings in Vercel domains while preserving team suffixes
+// Helper: Clean deployment URL hash strings in Vercel domains
 function cleanVercelUrl(url: string, projectName: string): string {
   if (!url || !projectName) return url;
   if (!url.includes(".vercel.app")) return url;
-  let hostname = url.replace(/^(http:\/\/|https:\/\/)/, "");
-  const prefix = `${projectName}-`;
-  if (hostname.startsWith(prefix)) {
-    const remaining = hostname.substring(prefix.length);
-    const parts = remaining.split("-");
-    if (parts.length > 1) {
-      const suffix = parts.slice(1).join("-");
-      return `${projectName}-${suffix}`;
-    }
-  }
-  return hostname;
+  return `${projectName.toLowerCase().replace(/[^a-z0-9-]/g, "-")}.vercel.app`;
 }
 
 // Helper: Fetch clean project domains from Vercel API
@@ -254,9 +244,8 @@ async function fetchCleanProjectDomains(projectId: string, vercelToken: string):
   } catch (e) {
     console.error("Failed to fetch clean project domains:", e);
   }
-  // Return unique domains sorted by length so shortest config is first
-  const uniqueDomains = [...new Set(domains)];
-  return uniqueDomains.sort((a, b) => a.length - b.length);
+  // Return unique domains in Vercel's default order
+  return [...new Set(domains)];
 }
 
 // Core Helper: Perform Vercel deployment of normalized files
@@ -367,14 +356,13 @@ async function deployToVercel(
   if (deployData.projectId) {
      const cleanDomains = await fetchCleanProjectDomains(deployData.projectId, vercelToken);
      if (cleanDomains.length > 0) {
-        aliasList = [...new Set([...cleanDomains, ...aliasList])];
-        mainUrl = cleanDomains[0];
-     } else if (deployData.name) {
-        // Fallback to the clean production project domain as default instead of the deployment hash URL
-        const defaultDomain = cleanVercelUrl(deployData.url, deployData.name);
-        aliasList = [...new Set([defaultDomain, ...aliasList])];
-        mainUrl = defaultDomain;
+        aliasList = [...new Set([...aliasList, ...cleanDomains])];
      }
+  }
+
+  if (aliasList.length > 0) {
+     // Prioritize Vercel's assigned alias domain (e.g. index-mocha-nine-23.vercel.app)
+     mainUrl = aliasList[0];
   } else if (deployData.name) {
      const defaultDomain = cleanVercelUrl(deployData.url, deployData.name);
      aliasList = [...new Set([defaultDomain, ...aliasList])];
@@ -661,13 +649,12 @@ app.get("/api/deploy/status/:id", async (req, res) => {
     if (data.projectId) {
        const cleanDomains = await fetchCleanProjectDomains(data.projectId, vercelToken);
        if (cleanDomains.length > 0) {
-          aliasList = [...new Set([...cleanDomains, ...aliasList])];
-          mainUrl = cleanDomains[0];
-       } else if (data.name) {
-          const defaultDomain = cleanVercelUrl(data.url, data.name);
-          aliasList = [...new Set([defaultDomain, ...aliasList])];
-          mainUrl = defaultDomain;
+          aliasList = [...new Set([...aliasList, ...cleanDomains])];
        }
+    }
+
+    if (aliasList.length > 0) {
+       mainUrl = aliasList[0];
     } else if (data.name) {
        const defaultDomain = cleanVercelUrl(data.url, data.name);
        aliasList = [...new Set([defaultDomain, ...aliasList])];

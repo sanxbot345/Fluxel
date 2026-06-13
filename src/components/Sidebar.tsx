@@ -1,28 +1,16 @@
 import React from "react";
-import { FolderArchive, Activity, X, Languages, User as UserIcon } from "lucide-react";
+import { FolderArchive, Activity, X, Languages } from "lucide-react";
 import { useLanguage } from "../utils/lang";
-import { useAuthStore } from "../store/authStore";
 
 interface SidebarProps {
   isOpen: boolean;
   setIsOpen: (val: boolean) => void;
   activeTab: "deploy";
   setActiveTab: (val: "deploy") => void;
-  onOpenProfile: () => void;
-  onOpenAuth: () => void;
 }
 
-export default function Sidebar({ isOpen, setIsOpen, activeTab, setActiveTab, onOpenProfile, onOpenAuth }: SidebarProps) {
+export default function Sidebar({ isOpen, setIsOpen, activeTab, setActiveTab }: SidebarProps) {
   const { lang, toggleLanguage, t } = useLanguage();
-  const { profile: authProfile, logout: authLogout } = useAuthStore();
-
-  const handleLogout = async () => {
-    try {
-      await authLogout();
-    } catch (err) {
-      console.error("Sign-out process hit an error", err);
-    }
-  };
 
   return (
     <>
@@ -106,57 +94,8 @@ export default function Sidebar({ isOpen, setIsOpen, activeTab, setActiveTab, on
         </div>
       </div>
 
-      {/* User Session Profile Section */}
-      {!authProfile ? (
-        <div className="p-4 mx-4 mt-auto mb-2 rounded-xl bg-gradient-to-r from-blue-500/5 to-purple-500/5 border border-white/5 flex flex-col gap-3 font-sans">
-          <div className="flex flex-col gap-1">
-            <p className="text-stone-200 text-xs font-semibold">Guest Mode</p>
-            <p className="text-stone-500 text-[10px] leading-relaxed">
-              {lang === "id" ? "Masuk untuk menyimpan riwayat deployment Anda." : "Sign in to save and access project histories."}
-            </p>
-          </div>
-          <button
-            onClick={onOpenAuth}
-            className="w-full text-center py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white hover:text-white rounded-xl text-xs font-display font-bold transition-all shadow-[0_4px_12px_rgba(37,99,235,0.15)] hover:shadow-[0_4px_16px_rgba(37,99,235,0.25)] cursor-pointer active:scale-95 duration-150 flex items-center justify-center gap-1.5"
-          >
-            <UserIcon className="w-3.5 h-3.5" />
-            <span>{lang === "id" ? "Masuk / Daftar" : "Sign In / Register"}</span>
-          </button>
-        </div>
-      ) : (
-        <div className="p-4 mx-4 mt-auto mb-2 rounded-xl bg-white/[0.02] border border-white/5 flex flex-col gap-3 font-sans">
-          <div className="flex items-center gap-3 cursor-pointer group" onClick={onOpenProfile}>
-            <img 
-              src={authProfile.avatarUrl || `https://api.dicebear.com/7.x/adventurer/svg?seed=${authProfile.uid}`} 
-              alt="Avatar" 
-              referrerPolicy="no-referrer"
-              className="w-10 h-10 rounded-full border border-white/10 bg-stone-900 shadow p-0.5 object-cover transition-transform group-hover:scale-105"
-            />
-            <div className="flex-1 min-w-0">
-              <p className="text-stone-200 text-xs font-semibold truncate group-hover:text-white transition-colors">{authProfile.fullName || "Fluxel User"}</p>
-              <p className="text-stone-500 text-[10px] truncate">{authProfile.email || "user@fluxel.sh"}</p>
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-2 mt-1">
-            <button
-              onClick={onOpenProfile}
-              className="text-center py-1.5 bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 rounded-lg text-[10px] font-display font-medium text-stone-300 hover:text-white transition-all cursor-pointer"
-            >
-              Profile
-            </button>
-            <button
-              onClick={handleLogout}
-              className="text-center py-1.5 bg-rose-500/10 hover:bg-rose-500/15 border border-rose-500/15 text-rose-400 font-display font-medium rounded-lg text-[10px] transition-all cursor-pointer"
-            >
-              Sign Out
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* Footer System Status */}
-      <div className="p-6 border-t border-t-white/5">
+      <div className="p-6 border-t border-t-white/5 mt-auto">
         <div className="flex items-center gap-3 px-4 py-3 bg-white/5 rounded-xl border border-white/5">
           <Activity className="w-4 h-4 text-emerald-400 animate-pulse" />
           <div className="flex flex-col">
