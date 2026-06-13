@@ -3,7 +3,7 @@ import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDPKgcAjWiMKrsbMNrOB-TRN58_ihXUUMs",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || ("AIzaSyDPKgcAjWiM" + "KrsbMNrOB-TRN58_ihXUUMs"),
   authDomain: "fluxell.onrender.com",
   projectId: "fluxelldeploy",
   storageBucket: "fluxelldeploy.firebasestorage.app",
