@@ -13,7 +13,7 @@ export default function AnalyticsPanel({ analytics }: AnalyticsPanelProps) {
     analytics.total > 0 ? Math.round((analytics.success / analytics.total) * 100) : 0;
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 min-w-0">
       {/* Total Deployments Card */}
       <div className="relative overflow-hidden rounded-2xl liquid-glass p-5 flex flex-col justify-between shadow-lg group hover:border-white/15 transition-all duration-300">
         <div className="absolute inset-0 bg-gradient-to-br from-white/2 to-transparent pointer-events-none" />

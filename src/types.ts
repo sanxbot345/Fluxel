@@ -35,29 +35,4 @@ export interface VercelLogEvent {
   type?: "stdout" | "stderr" | "info";
 }
 
-export interface NotificationSettings {
-  emailEnabled: boolean;
-  emailRecipient: string;
-  slackEnabled: boolean;
-  slackWebhookUrl: string;
-}
 
-export interface NotificationLog {
-  id: string;
-  timestamp: number;
-  eventName: "started" | "succeeded" | "failed";
-  projectName: string;
-  status: string;
-  deploymentUrl: string;
-  deploymentId: string;
-  emailSent: boolean;
-  emailConfigured: boolean;
-  slackSent: boolean;
-  slackConfigured: boolean;
-  emailRecipient: string;
-  slackWebhookUrl: string;
-  emailSubject: string;
-  emailBodyHtml: string;
-  slackPayload: string;
-  error?: string;
-}

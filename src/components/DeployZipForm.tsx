@@ -200,9 +200,10 @@ export default function DeployZipForm({
     formData.append("framework", framework);
     formData.append("target", "vercel");
 
+    let timer: NodeJS.Timeout | null = null;
     try {
       // Simulate build upload steps visually while performing real post fetch
-      const timer = setInterval(() => {
+      timer = setInterval(() => {
         setProgress((prev) => {
           if (prev < 85) return prev + Math.floor(Math.random() * 8) + 2;
           return prev;
@@ -243,6 +244,7 @@ export default function DeployZipForm({
         setProgress(0);
       }, 600);
     } catch (err: any) {
+      if (timer) clearInterval(timer);
       setProgress(0);
       setDeploying(false);
       onDeployError(err.message);
@@ -255,7 +257,7 @@ export default function DeployZipForm({
   };
 
   return (
-    <form onSubmit={submitDeploy} className="flex flex-col gap-5 w-full">
+    <form onSubmit={submitDeploy} className="flex flex-col gap-5 min-w-0">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Project Name */}
         <div className="flex flex-col gap-2">

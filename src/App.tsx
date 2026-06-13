@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Sparkles, Activity, Menu, Info, X, ChevronRight, Shield, Loader2 } from "lucide-react";
+import { Sparkles, Menu, Info, X, ChevronRight, Shield } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { DeploymentHistoryItem, DeploymentState, ProjectAnalytics } from "./types";
 import ParticleBackground from "./components/ParticleBackground";
@@ -254,7 +254,7 @@ export default function App() {
   };
 
   return (
-    <div className="relative min-h-screen supports-[min-height:100dvh]:min-h-[100dvh] text-stone-200 bg-[#050505] overflow-x-hidden font-sans pb-10 md:pb-20 flex flex-row">
+    <div className="relative min-h-screen supports-[min-height:100dvh]:min-h-[100dvh] w-full text-stone-200 bg-[#050505] overflow-x-hidden font-sans pb-10 md:pb-20 flex flex-row">
       {/* Visual background elements */}
       <ParticleBackground />
 
@@ -267,10 +267,10 @@ export default function App() {
       />
 
       {/* Main Dashboard Panel layout */}
-      <main className={`relative flex-1 w-full min-h-screen transition-all duration-300 z-10 ${isSidebarOpen ? 'lg:pl-64' : 'pl-0'}`}>
-        <div className="max-w-7xl mx-auto flex flex-col gap-4 md:gap-8 w-full pb-8">
+      <main className={`relative flex-1 min-w-0 min-h-screen transition-all duration-300 z-10 ${isSidebarOpen ? 'lg:pl-64' : 'pl-0'}`}>
+        <div className="max-w-7xl mx-auto flex flex-col gap-4 md:gap-8 min-w-0 pb-8">
           {/* Main Top control bar (Persistent Sidebar Toggle and Sparkles, consistent across all tabs) */}
-          <div className="sticky top-0 z-40 bg-[#050505]/80 backdrop-blur-xl px-4 md:px-8 lg:px-12 xl:px-16 pt-6 sm:pt-12 md:pt-16 pb-4 flex items-center justify-between w-full border-b border-white/5">
+          <div className="sticky top-0 z-40 bg-[#050505]/80 backdrop-blur-xl px-4 md:px-8 lg:px-12 xl:px-16 pt-6 sm:pt-12 md:pt-16 pb-4 flex items-center justify-between border-b border-white/5 min-w-0">
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -300,7 +300,7 @@ export default function App() {
             )}
           </div>
           
-          <div className="flex flex-col gap-4 md:gap-8 px-4 md:px-8 lg:px-12 xl:px-16 w-full">
+          <div className="flex flex-col gap-4 md:gap-8 px-4 md:px-8 lg:px-12 xl:px-16 pb-12 w-full max-w-full min-w-0">
             <AnimatedHeroText 
               title={t.heroTitle} 
               description={t.heroDesc} 
@@ -310,7 +310,7 @@ export default function App() {
           <AnalyticsPanel analytics={analytics} />
 
           {/* Dashboard Actions Grid Splitter */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-8 items-start w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-8 items-start min-w-0">
             {/* Left: Dispatcher Form panels (5 columns size) */}
             <section className="lg:col-span-12 xl:col-span-5 rounded-3xl liquid-glass p-4 sm:p-6 md:p-8 border border-white/5 shadow-2xl bg-black/20">
               <DeployZipForm

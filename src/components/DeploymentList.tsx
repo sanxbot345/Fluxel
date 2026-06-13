@@ -141,8 +141,8 @@ export default function DeploymentList({
   const sortedItems = [...items].sort((a, b) => b.createdAt - a.createdAt);
 
   return (
-    <div className="flex flex-col gap-4 w-full">
-      {sortedItems.map((item) => {
+    <div className="flex flex-col gap-4 min-w-0">
+      {sortedItems.map((item, index) => {
         // Ensure Vercel deployment hash URLs (e.g. index-g81h29-scope.vercel.app) are cleaned to the primary production domain with hobby/team suffix preserved
         let cleanVercelDomain = item.url || "";
         if (item.target !== "render" && cleanVercelDomain.includes(".vercel.app") && item.name) {
@@ -168,7 +168,7 @@ export default function DeploymentList({
 
         return (
           <div
-            key={item.id}
+            key={`${item.id}-${index}`}
             className="group relative overflow-hidden rounded-2xl liquid-glass p-5 md:p-6 flex flex-col md:flex-row md:items-center justify-between gap-5 border border-white/5 hover:border-white/12 hover:shadow-2xl transition-all duration-300 animate-modal-entrance"
             style={{
               boxShadow: "0 10px 30px -10px rgba(0,0,0,0.5)",
