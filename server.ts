@@ -197,6 +197,23 @@ function normalizeReadyState(state: string | undefined | null): string {
   return "ERROR";
 }
 
+// Helper: Clean deployment URL hash strings in Vercel domains while preserving team suffixes
+function cleanVercelUrl(url: string, projectName: string): string {
+  if (!url || !projectName) return url;
+  if (!url.includes(".vercel.app")) return url;
+  let hostname = url.replace(/^(http:\/\/|https:\/\/)/, "");
+  const prefix = `${projectName}-`;
+  if (hostname.startsWith(prefix)) {
+    const remaining = hostname.substring(prefix.length);
+    const parts = remaining.split("-");
+    if (parts.length > 1) {
+      const suffix = parts.slice(1).join("-");
+      return `${projectName}-${suffix}`;
+    }
+  }
+  return hostname;
+}
+
 // Helper: Fetch clean project domains from Vercel API
 async function fetchCleanProjectDomains(projectId: string, vercelToken: string): Promise<string[]> {
   const domains: string[] = [];
@@ -352,7 +369,16 @@ async function deployToVercel(
      if (cleanDomains.length > 0) {
         aliasList = [...new Set([...cleanDomains, ...aliasList])];
         mainUrl = cleanDomains[0];
+     } else if (deployData.name) {
+        // Fallback to the clean production project domain as default instead of the deployment hash URL
+        const defaultDomain = cleanVercelUrl(deployData.url, deployData.name);
+        aliasList = [...new Set([defaultDomain, ...aliasList])];
+        mainUrl = defaultDomain;
      }
+  } else if (deployData.name) {
+     const defaultDomain = cleanVercelUrl(deployData.url, deployData.name);
+     aliasList = [...new Set([defaultDomain, ...aliasList])];
+     mainUrl = defaultDomain;
   }
 
   return {
@@ -637,7 +663,15 @@ app.get("/api/deploy/status/:id", async (req, res) => {
        if (cleanDomains.length > 0) {
           aliasList = [...new Set([...cleanDomains, ...aliasList])];
           mainUrl = cleanDomains[0];
+       } else if (data.name) {
+          const defaultDomain = cleanVercelUrl(data.url, data.name);
+          aliasList = [...new Set([defaultDomain, ...aliasList])];
+          mainUrl = defaultDomain;
        }
+    } else if (data.name) {
+       const defaultDomain = cleanVercelUrl(data.url, data.name);
+       aliasList = [...new Set([defaultDomain, ...aliasList])];
+       mainUrl = defaultDomain;
     }
 
     res.json({

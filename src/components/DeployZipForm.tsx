@@ -51,6 +51,8 @@ const getFileIcon = (fileName: string) => {
 
 interface DeployZipFormProps {
   token: string;
+  user: any;
+  onOpenAuth: () => void;
   onDeployStart: () => void;
   onDeploySuccess: (deployment: any) => void;
   onDeployError: (errMessage: string) => void;
@@ -59,6 +61,8 @@ interface DeployZipFormProps {
 
 export default function DeployZipForm({
   token,
+  user,
+  onOpenAuth,
   onDeployStart,
   onDeploySuccess,
   onDeployError,
@@ -179,6 +183,16 @@ export default function DeployZipForm({
 
   const submitDeploy = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user) {
+      onOpenAuth();
+      addToast(
+        useLanguage().lang === "id" 
+          ? "Harap masuk (login) terlebih dahulu untuk melakukan pendeployan proyek Anda." 
+          : "Please log in first to proceed with your project deployment.", 
+        "info"
+      );
+      return;
+    }
     if (!token) {
       addToast(t.authRequired, "error");
       return;

@@ -189,7 +189,7 @@ export default function ConsoleModal({
               <div>
                 <h4 className="font-semibold mb-1">Failed to connect console stream</h4>
                 <p className="text-xs opacity-80 leading-relaxed">{error}</p>
-                <p className="text-xs opacity-60 mt-2">Make sure your Vercel Token has access to this deployment.</p>
+                <p className="text-xs opacity-60 mt-2">Make sure your Access Token has access to this deployment.</p>
               </div>
             </div>
           ) : logs.length === 0 ? (
@@ -225,7 +225,7 @@ export default function ConsoleModal({
             CONSOLE ACTIVE • STREAMING SECURE PIPE
           </span>
           <span>
-            Powered by Vercel Serverless Build Infrastructure
+            Powered by Fluxel Serverless Build Infrastructure
           </span>
         </div>
       </div>

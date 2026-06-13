@@ -130,7 +130,7 @@ export default function DeploymentList({
             No Deployments Registered
           </h4>
           <p className="font-sans text-xs text-stone-500 mt-1 max-w-sm leading-relaxed">
-            Link your Vercel Token and execute a ZIP target or github URL to launch a real cloud server instantly.
+            Link your Personal Access Token and execute a ZIP target or GitHub URL to launch a real cloud server instantly.
           </p>
         </div>
       </div>
@@ -143,7 +143,22 @@ export default function DeploymentList({
   return (
     <div className="flex flex-col gap-4 w-full">
       {sortedItems.map((item) => {
-        const deploymentUrl = item.url.startsWith("http") ? item.url : `https://${item.url}`;
+        // Ensure Vercel deployment hash URLs (e.g. index-g81h29-scope.vercel.app) are cleaned to the primary production domain with hobby/team suffix preserved
+        let cleanVercelDomain = item.url || "";
+        if (item.target !== "render" && cleanVercelDomain.includes(".vercel.app") && item.name) {
+          const hostname = cleanVercelDomain.replace(/^(http:\/\/|https:\/\/)/, "");
+          const prefix = `${item.name}-`;
+          if (hostname.startsWith(prefix)) {
+            const remaining = hostname.substring(prefix.length);
+            const parts = remaining.split("-");
+            if (parts.length > 1) {
+              const suffix = parts.slice(1).join("-");
+              cleanVercelDomain = `${item.name}-${suffix}`;
+            }
+          }
+        }
+          
+        const deploymentUrl = cleanVercelDomain.startsWith("http") ? cleanVercelDomain : `https://${cleanVercelDomain}`;
         const isProcessing =
           item.readyState === DeploymentState.BUILDING ||
           item.readyState === DeploymentState.QUEUED ||
@@ -173,17 +188,17 @@ export default function DeploymentList({
                     rel="noopener noreferrer"
                     className="font-display font-semibold text-white hover:text-emerald-400 transition-colors tracking-wide truncate max-w-xs md:max-w-md flex items-center gap-1.5 group/title"
                   >
-                    <span>{item.url}</span>
+                    <span>{cleanVercelDomain}</span>
                     <ExternalLink className="w-3.5 h-3.5 opacity-50 group-hover/title:opacity-100 text-stone-400 group-hover/title:text-emerald-400 transition-colors" />
                   </a>
                   {getStatusBadge(item.readyState)}
                   {item.target === "render" ? (
                     <span className="px-2 py-0.5 rounded-md bg-[#6c5bfa]/10 border border-[#6c5bfa]/20 text-[10px] font-bold text-[#6c5bfa] uppercase tracking-widest shadow-sm">
-                      Render
+                      FLUXEL
                     </span>
                   ) : (
                     <span className="px-2 py-0.5 rounded-md bg-stone-100 border border-stone-300 text-[10px] font-bold text-stone-900 uppercase tracking-widest shadow-sm">
-                      Vercel
+                      FLUXEL
                     </span>
                   )}
                   {isProcessing && (

@@ -1,6 +1,6 @@
 {
   "name": "Fluxel Deployment",
-  "description": "Professional deployment platform for Fluxel and Fluxelll workflows. Enable instant, secure, and professional deployments for your web applications with Fluxel.",
+  "description": "Deploy your files into a powerful website in seconds. Fluxel Deployment makes publishing web projects fast, simple, and reliable for everyone.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

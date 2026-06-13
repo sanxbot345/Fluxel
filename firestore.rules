@@ -1,0 +1,58 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global Safety Net: Default-deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Global Helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // User entity verification gate for creation (all mandatory fields required)
+    function isValidUserCreate(data) {
+      return data.keys().hasAll(['uid', 'fullName', 'email', 'createdAt'])
+        && data.uid is string && data.uid.size() <= 128
+        && data.fullName is string && data.fullName.size() >= 1 && data.fullName.size() <= 128
+        && data.email is string && data.email.size() <= 256
+        && (data.createdAt is string || data.createdAt is timestamp)
+        && (!('avatarUrl' in data) || (data.avatarUrl is string && data.avatarUrl.size() <= 2048));
+    }
+
+    // User entity verification gate for update (checks fields ONLY if they are present)
+    function isValidUserUpdate(data) {
+      return (!('uid' in data) || (data.uid is string && data.uid.size() <= 128))
+        && (!('fullName' in data) || (data.fullName is string && data.fullName.size() >= 1 && data.fullName.size() <= 128))
+        && (!('email' in data) || (data.email is string && data.email.size() <= 256))
+        && (!('createdAt' in data) || (data.createdAt is string || data.createdAt is timestamp))
+        && (!('avatarUrl' in data) || (data.avatarUrl is string && data.avatarUrl.size() <= 2048))
+        && (!('updatedAt' in data) || (data.updatedAt is string || data.updatedAt is timestamp));
+    }
+
+    // Match rules for User Profile items
+    match /users/{userId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
+      allow write: if isOwner(userId);
+    }
+  }
+}

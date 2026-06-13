@@ -68,6 +68,12 @@ const OtherLogo = () => (
 
 export const FRAMEWORK_OPTIONS: FrameworkOption[] = [
   {
+    value: "detect",
+    label: "Auto-Detect Framework",
+    description: "Automatically detect project type or static layout",
+    logo: <OtherLogo />,
+  },
+  {
     value: "vite",
     label: "Vite",
     description: "Vite (React, Vue, Svelte, etc.)",
@@ -90,12 +96,6 @@ export const FRAMEWORK_OPTIONS: FrameworkOption[] = [
     label: "Python",
     description: "Python Serverless Application",
     logo: <PythonLogo />,
-  },
-  {
-    value: "detect",
-    label: "Other",
-    description: "Auto-detect or Static HTML layout",
-    logo: <OtherLogo />,
   },
 ];
 
