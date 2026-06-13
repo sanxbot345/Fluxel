@@ -9,6 +9,9 @@ import { createServer as createViteServer } from "vite";
 const app = express();
 const PORT = 3000;
 
+// Optimize caching for SEO crawlers by using strong ETags
+app.set('etag', 'strong');
+
 // Use high capacity memory storage for ZIP file uploads
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -838,6 +841,10 @@ async function startServer() {
 
     app.get("/robots.txt", (req, res) => {
       res.sendFile(path.join(distPath, "robots.txt"));
+    });
+    
+    app.get("/changelog", (req, res) => {
+      res.sendFile(path.join(distPath, "changelog.html"));
     });
     
     app.get("*", (req, res) => {
