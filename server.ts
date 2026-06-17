@@ -25,6 +25,10 @@ app.use(express.json({ limit: "600mb" }));
 app.use(express.urlencoded({ limit: "600mb", extended: true }));
 
 // API: Check status of server
+app.get("/health", (req, res) => {
+  res.json({ status: "healthy", timestamp: new Date().toISOString() });
+});
+
 app.get("/api/health", (req, res) => {
   res.json({ status: "healthy", timestamp: new Date().toISOString() });
 });

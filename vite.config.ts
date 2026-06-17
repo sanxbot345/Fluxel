@@ -15,7 +15,7 @@ const seoPlugin = () => {
       }
 
       const buildTime = new Date().toISOString();
-      const domain = 'https://fluxell.onrender.com';
+      const domain = 'https://fluxell.my.id';
 
       // 1. Generate robots.txt
       const robots = `User-agent: *\nAllow: /\nSitemap: ${domain}/sitemap.xml\n`;
@@ -59,7 +59,7 @@ const seoPlugin = () => {
            "@type": "ListItem",
            "position": 1,
            "name": "Home",
-           "item": "https://fluxell.onrender.com/"
+           "item": "https://fluxell.my.id/"
          }]
       };
 
@@ -70,8 +70,8 @@ const seoPlugin = () => {
       
       // Update WebSite schema to include dateModified
       transformed = transformed.replace(
-        /"name": "Fluxel Deployment",(\s*)"url": "https:\/\/fluxell\.onrender\.com\/"/g,
-        `"name": "Fluxel Deployment",$1"url": "https://fluxell.onrender.com/",$1"dateModified": "${buildTime}"`
+        /"name": "Fluxel Deployment",(\s*)"url": "https:\/\/fluxell\.my\.id\/"/g,
+        `"name": "Fluxel Deployment",$1"url": "https://fluxell.my.id/",$1"dateModified": "${buildTime}"`
       );
 
       return transformed;
