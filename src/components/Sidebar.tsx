@@ -1,5 +1,5 @@
 import React from "react";
-import { FolderArchive, Activity, X, Languages } from "lucide-react";
+import { FolderArchive, Activity, X } from "lucide-react";
 import { useLanguage } from "../utils/lang";
 
 interface SidebarProps {
@@ -7,9 +7,18 @@ interface SidebarProps {
   setIsOpen: (val: boolean) => void;
   activeTab: "deploy";
   setActiveTab: (val: "deploy") => void;
+  currentProfile: string;
+  setCurrentProfile: (val: string) => void;
 }
 
-export default function Sidebar({ isOpen, setIsOpen, activeTab, setActiveTab }: SidebarProps) {
+export default function Sidebar({ 
+  isOpen, 
+  setIsOpen, 
+  activeTab, 
+  setActiveTab,
+  currentProfile,
+  setCurrentProfile
+}: SidebarProps) {
   const { lang, toggleLanguage, t } = useLanguage();
 
   return (
@@ -24,7 +33,7 @@ export default function Sidebar({ isOpen, setIsOpen, activeTab, setActiveTab }: 
 
       {/* Sidebar Panel */}
       <aside 
-        className={`w-64 fixed top-0 left-0 h-screen bg-black/80 backdrop-blur-3xl border-r border-r-white/5 flex flex-col z-50 transition-transform duration-300 ease-in-out ${
+        className={`w-64 fixed top-0 bottom-0 left-0 h-screen max-h-screen bg-black/80 backdrop-blur-3xl border-r border-r-white/5 flex flex-col z-50 overflow-y-auto transition-transform duration-300 ease-in-out lg:translate-x-0 ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -75,24 +84,6 @@ export default function Sidebar({ isOpen, setIsOpen, activeTab, setActiveTab }: 
           {t.sidebarFileDrop}
         </button>
       </nav>
-
-      {/* Language Auto-detect Indicator (Passive Status - No buttons) */}
-      <div className="p-4 mx-4 mb-2 rounded-xl bg-white/[0.02] border border-white/5 font-sans">
-        <div className="flex items-center gap-2 mb-1.5 text-stone-400">
-          <Languages className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
-          <span className="text-[10px] font-mono font-semibold uppercase tracking-wider text-stone-400">
-            {lang === "id" ? "Bahasa Sistem" : "System Language"}
-          </span>
-        </div>
-        <div className="flex items-center justify-between px-2 py-1.5 bg-stone-900 border border-white/5 rounded-lg">
-          <span className="text-xs text-stone-300 font-medium flex items-center gap-1.5">
-            {lang === "id" ? "🇮🇩 Indonesia" : "🇬🇧 English"}
-          </span>
-          <span className="text-[8px] font-mono font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded-full border border-emerald-500/10">
-            AUTO
-          </span>
-        </div>
-      </div>
 
       {/* Footer System Status */}
       <div className="p-6 border-t border-t-white/5 mt-auto">

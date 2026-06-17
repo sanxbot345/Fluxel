@@ -1,28 +1,20 @@
 <div align="center">
-  <img width="1200" height="675" alt="Fluxel - AI Studio App" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
+<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
 </div>
 
-# 🚀 Fluxel - Run and Deploy Your AI Studio App
+# Run and deploy your AI Studio app
 
-Welcome to Fluxel! A modern AI-powered application built with TypeScript. This repository contains everything you need to run and deploy your app locally.
+This contains everything you need to run your app locally.
 
-**View your app in AI Studio:** https://ai.studio/apps/b314ed5d-ff73-480d-8838-01bc4e5cd31b
+View your app in AI Studio: https://ai.studio/apps/b314ed5d-ff73-480d-8838-01bc4e5cd31b
+
+## Run Locally
+
+**Prerequisites:**  Node.js
 
 
-
-**Website :** https://fluxell.onrender.com
----
-
-## 📋 Prerequisites
-
-- **Node.js** (v16 or higher)
-- **npm** or **yarn** (package manager)
-- **Gemini API Key** from Google
-
----
-
-## ⚡ Quick Start
-
-### 1. Install Dependencies
-```bash
-npm install
+1. Install dependencies:
+   `npm install`
+2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
+3. Run the app:
+   `npm run dev`

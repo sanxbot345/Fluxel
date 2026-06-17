@@ -20,6 +20,7 @@ export interface DeploymentHistoryItem {
   gitRepoUrl?: string;
   gitBranch?: string;
   target?: string;
+  projectId?: string;
 }
 
 export interface ProjectAnalytics {

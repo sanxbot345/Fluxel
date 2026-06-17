@@ -12,13 +12,17 @@ const PORT = 3000;
 // Optimize caching for SEO crawlers by using strong ETags
 app.set('etag', 'strong');
 
-// Use high capacity memory storage for ZIP file uploads
+// Use high capacity memory storage for ZIP file uploads (Supporting up to 600MB for large projects like AI, full stacks)
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB limit
+  limits: {
+    fileSize: 600 * 1024 * 1024, // 600MB limit
+    fieldSize: 600 * 1024 * 1024
+  },
 });
 
-app.use(express.json());
+app.use(express.json({ limit: "600mb" }));
+app.use(express.urlencoded({ limit: "600mb", extended: true }));
 
 // API: Check status of server
 app.get("/api/health", (req, res) => {
@@ -246,8 +250,18 @@ async function fetchCleanProjectDomains(projectId: string, vercelToken: string):
   } catch (e) {
     console.error("Failed to fetch clean project domains:", e);
   }
-  // Return unique domains in Vercel's default order
-  return [...new Set(domains)];
+  // Return unique domains in priority order:
+  // 1. Custom domains (not vercel.app)
+  // 2. Shortest vercel.app domain (usually the direct project domain)
+  // This prevents long hashed/team URLs from being the primary link
+  const uniqueDomains = [...new Set(domains)];
+  return uniqueDomains.sort((a, b) => {
+    const aIsVercel = a.includes('.vercel.app');
+    const bIsVercel = b.includes('.vercel.app');
+    if (aIsVercel && !bIsVercel) return 1;
+    if (!aIsVercel && bIsVercel) return -1;
+    return a.length - b.length;
+  });
 }
 
 // Core Helper: Perform Vercel deployment of normalized files
@@ -358,7 +372,16 @@ async function deployToVercel(
   if (deployData.projectId) {
      const cleanDomains = await fetchCleanProjectDomains(deployData.projectId, vercelToken);
      if (cleanDomains.length > 0) {
-        aliasList = [...new Set([...aliasList, ...cleanDomains])];
+        aliasList = [...new Set([...cleanDomains, ...aliasList])];
+        
+        // Ensure the combined list is strictly sorted as well
+        aliasList.sort((a: string, b: string) => {
+          const aIsVercel = a.includes('.vercel.app');
+          const bIsVercel = b.includes('.vercel.app');
+          if (aIsVercel && !bIsVercel) return 1;
+          if (!aIsVercel && bIsVercel) return -1;
+          return a.length - b.length;
+        });
      }
   }
 
@@ -373,6 +396,7 @@ async function deployToVercel(
 
   return {
     id: deployData.id,
+    projectId: deployData.projectId,
     url: mainUrl,
     alias: aliasList,
     name: deployData.name,
@@ -384,7 +408,7 @@ async function deployToVercel(
 }
 
 // API: Deploy ZIP Project
-app.post("/api/deploy/zip", upload.array("projectFiles", 50), async (req, res) => {
+app.post("/api/deploy/zip", upload.array("projectFiles", 150), async (req, res) => {
   try {
     const vercelToken = resolveVercelToken(req.headers.authorization);
     const projectName = req.body.projectName || "fluxel-project";
@@ -651,7 +675,16 @@ app.get("/api/deploy/status/:id", async (req, res) => {
     if (data.projectId) {
        const cleanDomains = await fetchCleanProjectDomains(data.projectId, vercelToken);
        if (cleanDomains.length > 0) {
-          aliasList = [...new Set([...aliasList, ...cleanDomains])];
+          aliasList = [...new Set([...cleanDomains, ...aliasList])];
+          
+          // Ensure the combined list is strictly sorted
+          aliasList.sort((a: string, b: string) => {
+            const aIsVercel = a.includes('.vercel.app');
+            const bIsVercel = b.includes('.vercel.app');
+            if (aIsVercel && !bIsVercel) return 1;
+            if (!aIsVercel && bIsVercel) return -1;
+            return a.length - b.length;
+          });
        }
     }
 
@@ -665,6 +698,7 @@ app.get("/api/deploy/status/:id", async (req, res) => {
 
     res.json({
       id: data.id,
+      projectId: data.projectId,
       url: mainUrl,
       alias: aliasList,
       readyState: normalizeReadyState(data.readyState || data.status),
@@ -752,25 +786,30 @@ app.delete("/api/deploy/delete/:id", async (req, res) => {
       return res.status(401).json({ error: "Vercel Access Token is not set. Please configure VERCEL_TOKEN in your server-side environment secrets panel." });
     }
 
-    // 1. Fetch deployment details first to retrieve the associate Vercel projectId or project name
-    let projectId: string | null = null;
-    let projectName: string | null = null;
+    // 1. Fetch deployment details first to retrieve the associated Vercel projectId or project name
+    const qProjectId = req.query.projectId as string;
+    const qProjectName = req.query.name as string;
+
+    let projectId: string | null = qProjectId || null;
+    let projectName: string | null = qProjectName || null;
     
-    try {
-      const getResponse = await fetch(`https://api.vercel.com/v13/deployments/${deploymentId}`, {
-        headers: {
-          Authorization: `Bearer ${vercelToken}`,
-        },
-      });
-      if (getResponse.ok) {
-        const getDetails = await getResponse.json();
-        if (getDetails) {
-          projectId = getDetails.projectId || null;
-          projectName = getDetails.name || null;
+    if (!projectId) {
+      try {
+        const getResponse = await fetch(`https://api.vercel.com/v13/deployments/${deploymentId}`, {
+          headers: {
+            Authorization: `Bearer ${vercelToken}`,
+          },
+        });
+        if (getResponse.ok) {
+          const getDetails = await getResponse.json();
+          if (getDetails) {
+            projectId = getDetails.projectId || null;
+            projectName = getDetails.name || null;
+          }
         }
+      } catch (e) {
+        console.error("Could not fetch deployment details before deletion:", e);
       }
-    } catch (e) {
-      console.error("Could not fetch deployment details before deletion:", e);
     }
 
     let projectDeleted = false;
@@ -797,8 +836,8 @@ app.delete("/api/deploy/delete/:id", async (req, res) => {
       }
     }
 
-    // 3. Fallback: If project deletion didn't succeed, delete the specific deployment directly
-    if (!projectDeleted) {
+    // 3. Fallback/Complementary: Also delete the specific deployment directly to be absolutely sure Vercel reflects this
+    try {
       const deleteResponse = await fetch(`https://api.vercel.com/v13/deployments/${deploymentId}`, {
         method: "DELETE",
         headers: {
@@ -806,14 +845,21 @@ app.delete("/api/deploy/delete/:id", async (req, res) => {
         },
       });
 
-      const data = await deleteResponse.json();
-      if (!deleteResponse.ok) {
-        return res.status(deleteResponse.status).json({ error: data?.error?.message || "Failed to delete deployment." });
+      const data = await deleteResponse.json().catch(() => ({}));
+      if (deleteResponse.ok) {
+        console.log(`Successfully deleted specific Vercel deployment: ${deploymentId}`);
+      } else {
+        console.warn(`Vercel deployment deletion returned non-2xx for ${deploymentId}:`, data);
       }
-      return res.json({ success: true, message: "Deployment deleted successfully from Vercel." });
+    } catch (e) {
+      console.error("Error during Vercel deployment deletion:", e);
     }
 
-    res.json({ success: true, message: "Project and all of its associated deployments successfully deleted from Vercel." });
+    if (projectDeleted) {
+      return res.json({ success: true, message: "Project and all associated deployments successfully deleted from Vercel." });
+    } else {
+      return res.json({ success: true, message: "Teardown command issued to Vercel." });
+    }
   } catch (error: any) {
     console.error("Delete Error:", error);
     res.status(500).json({ error: error.message || "Failed to delete deployment." });

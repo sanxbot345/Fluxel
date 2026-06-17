@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Sparkles, Menu, Info, X, ChevronRight, Shield } from "lucide-react";
+import { Sparkles, Menu, Info, X, ChevronRight, Shield, ChevronDown, Check } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { DeploymentHistoryItem, DeploymentState, ProjectAnalytics } from "./types";
 import ParticleBackground from "./components/ParticleBackground";
@@ -13,7 +13,7 @@ import AnimatedHeroText from "./components/AnimatedHeroText";
 import { useLanguage } from "./utils/lang";
 
 export default function App() {
-  const { lang, toggleLanguage, t } = useLanguage();
+  const { lang, setLanguageManual, t } = useLanguage();
   
   // Vercel token is securely managed on the backend script level
   const [token] = useState<string>("script_token");
@@ -21,6 +21,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<"deploy">("deploy");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isDisclaimerOpen, setIsDisclaimerOpen] = useState(false);
+  const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
   const [toasts, setToasts] = useState<ToastItem[]>([]);
   
   // Isolated multi-user deployment archives representation
@@ -32,25 +33,39 @@ export default function App() {
   // Track active item being verified for deletion
   const [itemToDelete, setItemToDelete] = useState<DeploymentHistoryItem | null>(null);
 
-  // Sync isolated user/guest history back on state modification
+  // Dynamic Chrome Profile / Device account isolation state
+  const [currentProfile, setCurrentProfile] = useState<string>(() => {
+    try {
+      return localStorage.getItem("fluxel_active_profile") || "Default";
+    } catch {
+      return "Default";
+    }
+  });
+
+  // Sync isolated user/guest history back on state modification or profile switch
   useEffect(() => {
     try {
-      const stored = localStorage.getItem("fluxel_deploy_history");
+      localStorage.setItem("fluxel_active_profile", currentProfile);
+      const storageKey = `fluxel_deploy_history_${currentProfile.trim().toLowerCase() || "default"}`;
+      const stored = localStorage.getItem(storageKey);
       if (stored) {
         setHistory(JSON.parse(stored));
+      } else {
+        setHistory([]);
       }
     } catch {
       setHistory([]);
     }
-  }, []);
+  }, [currentProfile]);
 
   useEffect(() => {
     try {
-      localStorage.setItem("fluxel_deploy_history", JSON.stringify(history));
+      const storageKey = `fluxel_deploy_history_${currentProfile.trim().toLowerCase() || "default"}`;
+      localStorage.setItem(storageKey, JSON.stringify(history));
     } catch (e) {
       console.error("Failed to sync history state with localStorage", e);
     }
-  }, [history]);
+  }, [history, currentProfile]);
 
   // Toast notifier helper
   const addToast = (message: string, type: "success" | "error" | "info" = "info") => {
@@ -75,6 +90,7 @@ export default function App() {
 
     const historyItem: DeploymentHistoryItem = {
       id: newDeploy.id,
+      projectId: newDeploy.projectId,
       name: newDeploy.name,
       url: finalUrl,
       readyState: newDeploy.readyState as DeploymentState,
@@ -135,7 +151,12 @@ export default function App() {
                       fetchedUrl = data.alias[0];
                     }
                     const displayUrl = fetchedUrl || h.url;
-                    const updated = { ...h, readyState: data.readyState as DeploymentState, url: displayUrl };
+                    const updated = {
+                      ...h,
+                      readyState: data.readyState as DeploymentState,
+                      url: displayUrl,
+                      ...(data.projectId ? { projectId: data.projectId } : {})
+                    };
                     if (data.readyState === DeploymentState.READY) {
                       addToast(`Build Completed! "${displayUrl}" is now online!`, "success");
                     } else if (data.readyState === DeploymentState.ERROR) {
@@ -191,7 +212,12 @@ export default function App() {
             if (data.alias && Array.isArray(data.alias) && data.alias.length > 0) {
               fetchedUrl = data.alias[0];
             }
-            return { ...h, readyState: data.readyState as DeploymentState, url: fetchedUrl || h.url };
+            return {
+              ...h,
+              readyState: data.readyState as DeploymentState,
+              url: fetchedUrl || h.url,
+              ...(data.projectId ? { projectId: data.projectId } : {})
+            };
           }
           return h;
         })
@@ -217,7 +243,8 @@ export default function App() {
     try {
       if (token) {
         // Carry out cloud teardown and clean up on Vercel
-        fetch(`/api/deploy/delete/${item.id}`, {
+        const deleteUrl = `/api/deploy/delete/${item.id}?projectId=${encodeURIComponent(item.projectId || "")}&name=${encodeURIComponent(item.name || "")}`;
+        fetch(deleteUrl, {
           method: "DELETE",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -264,17 +291,19 @@ export default function App() {
         setIsOpen={setIsSidebarOpen} 
         activeTab={activeTab} 
         setActiveTab={setActiveTab} 
+        currentProfile={currentProfile}
+        setCurrentProfile={setCurrentProfile}
       />
 
       {/* Main Dashboard Panel layout */}
-      <main className={`relative flex-1 min-w-0 min-h-screen transition-all duration-300 z-10 ${isSidebarOpen ? 'lg:pl-64' : 'pl-0'}`}>
+      <main className="relative flex-1 min-w-0 min-h-screen transition-all duration-300 z-10 lg:pl-64 pl-0">
         <div className="max-w-7xl mx-auto flex flex-col gap-4 md:gap-8 min-w-0 pb-8">
           {/* Main Top control bar (Persistent Sidebar Toggle and Sparkles, consistent across all tabs) */}
           <div className="sticky top-0 z-40 bg-[#050505]/80 backdrop-blur-xl px-4 md:px-8 lg:px-12 xl:px-16 pt-6 sm:pt-12 md:pt-16 pb-4 flex items-center justify-between border-b border-white/5 min-w-0">
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                className="p-1.5 rounded-xl bg-stone-900 border border-white/5 hover:bg-stone-850 text-stone-400 hover:text-white transition-all shadow-inner cursor-pointer"
+                className="p-1.5 rounded-xl bg-stone-900 border border-white/5 hover:bg-stone-850 text-stone-400 hover:text-white transition-all shadow-inner cursor-pointer lg:hidden"
                 title="Toggle Sidebar"
               >
                 <Menu className="w-4 h-4" />
@@ -287,17 +316,89 @@ export default function App() {
               </div>
             </div>
 
-            {activeTab === "deploy" && (
-              <button
-                onClick={() => setIsDisclaimerOpen(true)}
-                className="flex items-center gap-2 px-4 py-2 text-xs font-mono font-medium text-amber-400 hover:text-amber-300 bg-amber-500/10 hover:bg-amber-500/15 border border-amber-500/20 hover:border-amber-500/35 shadow-lg shadow-amber-500/5 transition-all cursor-pointer active:scale-95 duration-150"
-                style={{ borderRadius: "100px" }}
-                id="disclaimer-button"
-              >
-                <Info className="w-3.5 h-3.5 text-amber-400" />
-                <span>{t.disclaimerBtn}</span>
-              </button>
-            )}
+            <div className="flex items-center gap-3">
+              {/* Language Dropdown Selector */}
+              <div className="relative">
+                <button
+                  onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
+                  className="flex items-center gap-2 px-3.5 py-2 text-xs font-mono font-medium text-stone-200 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-white/15 shadow-lg select-none transition-all cursor-pointer active:scale-95 duration-150 rounded-full"
+                  title="Change Language"
+                >
+                  <span className="flex items-center gap-1.5 pl-0.5">
+                    {lang === "en" ? (
+                      <>
+                        <span className="text-xs">🇬🇧</span>
+                        <span>EN</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-xs">🇮🇩</span>
+                        <span>IND</span>
+                      </>
+                    )}
+                  </span>
+                  <ChevronDown className={`w-3.5 h-3.5 text-stone-400 transition-transform duration-200 ${isLangDropdownOpen ? "rotate-180" : ""}`} />
+                </button>
+                {isLangDropdownOpen && (
+                  <>
+                    <div 
+                      className="fixed inset-0 z-40 cursor-default" 
+                      onClick={() => setIsLangDropdownOpen(false)} 
+                    />
+                    <div 
+                      className="absolute right-0 mt-2.5 w-36 backdrop-blur-xl bg-stone-900/95 border border-white/12 rounded-xl shadow-[0_12px_45px_rgba(0,0,0,0.8)] z-50 py-1.5 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150"
+                    >
+                      <button
+                        onClick={() => {
+                          setLanguageManual("en");
+                          setIsLangDropdownOpen(false);
+                        }}
+                        className={`w-full flex items-center justify-between px-3.5 py-2.5 text-xs text-left cursor-pointer transition-all duration-150 rounded-lg mx-1 w-[calc(100%-8px)] ${
+                          lang === "en"
+                            ? "bg-emerald-500/10 text-emerald-400 font-semibold"
+                            : "text-stone-400 hover:bg-white/5 hover:text-white"
+                        }`}
+                      >
+                        <span className="flex items-center gap-2.5">
+                          <span className="text-sm">🇬🇧</span>
+                          <span>EN</span>
+                        </span>
+                        {lang === "en" && <Check className="w-3.5 h-3.5 text-emerald-400" />}
+                      </button>
+                      <button
+                        onClick={() => {
+                          setLanguageManual("id");
+                          setIsLangDropdownOpen(false);
+                        }}
+                        className={`w-full flex items-center justify-between px-3.5 py-2.5 text-xs text-left cursor-pointer transition-all duration-150 rounded-lg mx-1 w-[calc(100%-8px)] ${
+                          lang === "id"
+                            ? "bg-emerald-500/10 text-emerald-400 font-semibold"
+                            : "text-stone-400 hover:bg-white/5 hover:text-white"
+                        }`}
+                      >
+                        <span className="flex items-center gap-2.5">
+                          <span className="text-sm">🇮🇩</span>
+                          <span>IND</span>
+                        </span>
+                        {lang === "id" && <Check className="w-3.5 h-3.5 text-emerald-400" />}
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {activeTab === "deploy" && (
+                <button
+                  onClick={() => setIsDisclaimerOpen(true)}
+                  className="flex items-center gap-2 px-4 py-2 text-xs font-mono font-medium text-amber-400 hover:text-amber-300 bg-amber-500/10 hover:bg-amber-500/15 border border-amber-500/20 hover:border-amber-500/35 shadow-lg shadow-amber-500/5 transition-all cursor-pointer active:scale-95 duration-150"
+                  style={{ borderRadius: "100px" }}
+                  id="disclaimer-button"
+                >
+                  <Info className="w-3.5 h-3.5 text-amber-400" />
+                  <span>{t.disclaimerBtn}</span>
+                </button>
+              )}
+            </div>
           </div>
           
           <div className="flex flex-col gap-4 md:gap-8 px-4 md:px-8 lg:px-12 xl:px-16 pb-12 w-full max-w-full min-w-0">
@@ -347,8 +448,8 @@ export default function App() {
 
           {/* Footer */}
           <footer className="mt-8 text-center text-stone-600 text-xs py-4 border-t border-white/5">
-            <p className="mb-1">© 2026 Fluxel Deployment. All rights reserved.</p>
-            <p>Fluxel Deployment is developed and maintained by Fluxel Deployment.</p>
+            <p className="mb-1">{t.footerRights}</p>
+            <p>{t.footerDesc}</p>
           </footer>
         </div>
       </main>

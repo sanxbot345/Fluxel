@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Terminal, X, RefreshCw, AlertCircle, Copy, Check } from "lucide-react";
 import { VercelLogEvent } from "../types";
+import { useLanguage } from "../utils/lang";
 
 interface ConsoleModalProps {
   isOpen: boolean;
@@ -26,6 +27,7 @@ export default function ConsoleModal({
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const terminalEndRef = useRef<HTMLDivElement>(null);
+  const { t } = useLanguage();
 
   const fetchLogs = async (silent = false) => {
     if (!token || !deploymentId) return;
@@ -95,7 +97,7 @@ export default function ConsoleModal({
     const fullText = logs.map((l) => `[${new Date(l.timestamp).toLocaleTimeString()}] ${l.text}`).join("\n");
     navigator.clipboard.writeText(fullText);
     setCopied(true);
-    addToast("Console logs copied to clipboard.", "success");
+    addToast(t.consoleLogsCopiedToast, "success");
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -134,13 +136,13 @@ export default function ConsoleModal({
             </div>
             <div>
               <h3 className="font-display text-sm font-semibold text-white tracking-wide flex items-center gap-2">
-                Deployment Console Logs
+                {t.consoleLogsTitle}
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                   {readyState}
                 </span>
               </h3>
               <p className="text-[10px] font-mono text-stone-500 mt-0.5">
-                Project: {projectName} • ID: {deploymentId}
+                {t.projectLabel}: {projectName} • ID: {deploymentId}
               </p>
             </div>
           </div>
@@ -181,27 +183,27 @@ export default function ConsoleModal({
           {loading && logs.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full gap-3 select-none text-stone-500 animate-pulse">
               <RefreshCw className="w-8 h-8 animate-spin" />
-              <span>Attaching virtual secure console pipeline...</span>
+              <span>{t.consoleAttaching}</span>
             </div>
           ) : error ? (
             <div className="flex items-start gap-3 p-4 rounded-xl border border-rose-500/20 bg-rose-950/10 text-rose-400 max-w-lg mx-auto mt-12 select-none">
               <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
               <div>
-                <h4 className="font-semibold mb-1">Failed to connect console stream</h4>
+                <h4 className="font-semibold mb-1">{t.consoleFailedConnect}</h4>
                 <p className="text-xs opacity-80 leading-relaxed">{error}</p>
-                <p className="text-xs opacity-60 mt-2">Make sure your Access Token has access to this deployment.</p>
+                <p className="text-xs opacity-60 mt-2">{t.consoleTokenWarning}</p>
               </div>
             </div>
           ) : logs.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full gap-2.5 text-stone-600 select-none font-sans">
               <Terminal className="w-8 h-8 opacity-40 animate-pulse" />
-              <span className="text-xs tracking-wide">Waiting for compilation output queue...</span>
-              <span className="text-[10px] opacity-60 font-mono">Build containers are preparing environment specs.</span>
+              <span className="text-xs tracking-wide">{t.consoleWaiting}</span>
+              <span className="text-[10px] opacity-60 font-mono">{t.consolePreparing}</span>
             </div>
           ) : (
             <>
               <div className="text-stone-700 select-none pb-2 border-b border-white/5 mb-2 font-mono text-[11px]">
-                🚀 fluxel-terminal-shell attached successfully on container platform.
+                🚀 {t.consoleAttached}
               </div>
               {logs.map((log) => (
                 <div key={log.id} className="flex items-start gap-4">
@@ -222,10 +224,10 @@ export default function ConsoleModal({
         <div className="px-6 py-3 border-t border-white/5 bg-stone-950/90 text-[10.5px] font-mono text-stone-500 flex flex-wrap items-center justify-between gap-2.5">
           <span className="flex items-center gap-1.5 leading-none">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            CONSOLE ACTIVE • STREAMING SECURE PIPE
+            {t.consoleActiveStream}
           </span>
           <span>
-            Powered by Fluxel Serverless Build Infrastructure
+            {t.consolePoweredBy}
           </span>
         </div>
       </div>

@@ -12,6 +12,10 @@ export interface TranslationSchema {
   sidebarTitle: string;
   sidebarFileDrop: string;
   statusOnline: string;
+  profileTitle: string;
+  profileLabel: string;
+  profilePlaceholder: string;
+  profileHint: string;
 
   // Disclaimer Button & Modal
   disclaimerBtn: string;
@@ -68,6 +72,35 @@ export interface TranslationSchema {
   toreDownSuccess: string;
   toreDownVercel: string;
   detectedBadge: string;
+
+  // Additional keys for full localization
+  stateSuccess: string;
+  stateBuilding: string;
+  stateQueued: string;
+  stateFailed: string;
+  noDeploysTitle: string;
+  noDeploysDesc: string;
+  projectLabel: string;
+  githubImportLabel: string;
+  zipUploadLabel: string;
+  copyUrlBtn: string;
+  consoleBtn: string;
+  openBtn: string;
+  toastCopied: string;
+
+  consoleLogsTitle: string;
+  consoleLogsCopiedToast: string;
+  consoleAttaching: string;
+  consoleFailedConnect: string;
+  consoleTokenWarning: string;
+  consoleWaiting: string;
+  consolePreparing: string;
+  consoleAttached: string;
+  consoleActiveStream: string;
+  consolePoweredBy: string;
+
+  footerRights: string;
+  footerDesc: string;
 }
 
 export const translations: Record<Language, TranslationSchema> = {
@@ -78,6 +111,10 @@ export const translations: Record<Language, TranslationSchema> = {
     sidebarTitle: "Deployment",
     sidebarFileDrop: "File Drop",
     statusOnline: "Connected",
+    profileTitle: "Profil & Akun",
+    profileLabel: "Nama Profil Chrome / Perangkat",
+    profilePlaceholder: "Contoh: Akun Utama",
+    profileHint: "Riwayat disimpan lokal & dipisah berdasarkan nama profil ini agar tidak bercampur di setiap akun/perangkat.",
     disclaimerBtn: "Disclaimer",
     disclaimerTitle: "Pernyataan Batasan Layanan (Disclaimer)",
     disclaimerText1: "Aplikasi ini adalah sistem deployment profesional yang memfasilitasi integrasi file statis (ZIP) atau repositori Git secara efisien, praktis, dan instan.",
@@ -123,7 +160,35 @@ export const translations: Record<Language, TranslationSchema> = {
     uploadedStarting: "Arsip terunggah. Memulai kompilasi serverless...",
     toreDownSuccess: "Berhasil membersihkan resource cloud untuk",
     toreDownVercel: "Penghapusan sisi server telah dimulai untuk",
-    detectedBadge: "Sistem mendeteksi bahasa perangkat Anda:"
+    detectedBadge: "Sistem mendeteksi bahasa perangkat Anda:",
+
+    stateSuccess: "Sukses",
+    stateBuilding: "Proses Build",
+    stateQueued: "Mengantre",
+    stateFailed: "Gagal",
+    noDeploysTitle: "Tidak Ada Deployment Terdaftar",
+    noDeploysDesc: "Hubungkan Token Akses Pribadi Anda dan jalankan target ZIP atau URL GitHub untuk meluncurkan server cloud nyata secara instan.",
+    projectLabel: "Proyek",
+    githubImportLabel: "Impor GitHub",
+    zipUploadLabel: "Unggah ZIP",
+    copyUrlBtn: "Salin URL",
+    consoleBtn: "Konsol",
+    openBtn: "Buka",
+    toastCopied: "URL output berhasil disalin.",
+
+    consoleLogsTitle: "Log Konsol Deployment",
+    consoleLogsCopiedToast: "Log konsol berhasil disalin ke papan klip.",
+    consoleAttaching: "Menghubungkan jalur pipa konsol aman virtual...",
+    consoleFailedConnect: "Gagal menghubungkan aliran data konsol",
+    consoleTokenWarning: "Pastikan Token Akses Anda memiliki hak akses ke pendeployan ini.",
+    consoleWaiting: "Menunggu antrean output kompilasi...",
+    consolePreparing: "Wadah build sedang menyiapkan spesifikasi lingkungan.",
+    consoleAttached: "fluxel-terminal-shell berhasil terhubung pada platform wadah.",
+    consoleActiveStream: "KONSOL AKTIF • ALIRAN PIPA AMAN",
+    consolePoweredBy: "Didukung oleh Infrastruktur Build Serverless Fluxel",
+
+    footerRights: "© 2026 Fluxel Deployment. Hak cipta dilindungi undang-undang.",
+    footerDesc: "Fluxel Deployment dikembangkan dan dikelola oleh Fluxel Deployment.",
   },
   en: {
     heroTitle: "Fluxel Deployment",
@@ -132,6 +197,10 @@ export const translations: Record<Language, TranslationSchema> = {
     sidebarTitle: "Deployment",
     sidebarFileDrop: "File Drop",
     statusOnline: "Connected",
+    profileTitle: "Profile & Account",
+    profileLabel: "Chrome Profile / Device Name",
+    profilePlaceholder: "e.g. Primary Account",
+    profileHint: "History is saved locally & separated by this profile name to keep deployments organized per account/device.",
     disclaimerBtn: "Disclaimer",
     disclaimerTitle: "Service Limitation Disclaimer",
     disclaimerText1: "This application is a professional deployment utility enabling instant, rapid integration of static assets (ZIP) or Git repositories with zero complexity.",
@@ -177,7 +246,35 @@ export const translations: Record<Language, TranslationSchema> = {
     uploadedStarting: "Pipeline uploaded. Starting serverless compilation...",
     toreDownSuccess: "Tore down cloud resources securely for",
     toreDownVercel: "Server-side teardown initiated for",
-    detectedBadge: "Detected system device language:"
+    detectedBadge: "Detected system device language:",
+
+    stateSuccess: "Success",
+    stateBuilding: "Building",
+    stateQueued: "Queued",
+    stateFailed: "Failed",
+    noDeploysTitle: "No Deployments Registered",
+    noDeploysDesc: "Link your Personal Access Token and execute a ZIP target or GitHub URL to launch a real cloud server instantly.",
+    projectLabel: "Project",
+    githubImportLabel: "GitHub Import",
+    zipUploadLabel: "ZIP Upload",
+    copyUrlBtn: "Copy URL",
+    consoleBtn: "Console",
+    openBtn: "Open",
+    toastCopied: "output URL copied.",
+
+    consoleLogsTitle: "Deployment Console Logs",
+    consoleLogsCopiedToast: "Console logs copied to clipboard.",
+    consoleAttaching: "Attaching virtual secure console pipeline...",
+    consoleFailedConnect: "Failed to connect console stream",
+    consoleTokenWarning: "Make sure your Access Token has access to this deployment.",
+    consoleWaiting: "Waiting for compilation output queue...",
+    consolePreparing: "Build containers are preparing environment specs.",
+    consoleAttached: "fluxel-terminal-shell attached successfully on container platform.",
+    consoleActiveStream: "CONSOLE ACTIVE • STREAMING SECURE PIPE",
+    consolePoweredBy: "Powered by Fluxel Serverless Build Infrastructure",
+
+    footerRights: "© 2026 Fluxel Deployment. All rights reserved.",
+    footerDesc: "Fluxel Deployment is developed and maintained by Fluxel Deployment.",
   }
 };
 
@@ -200,9 +297,9 @@ export function useLanguage() {
         return "id";
       }
     } catch (e) {
-      console.warn("Language auto-detection error, defaulting to Indonesia:", e);
+      console.warn("Language auto-detection error, defaulting to English:", e);
     }
-    return "id"; // Default is Indonesian as it was originally built
+    return "en"; // Default is English as requested
   });
 
   const toggleLanguage = () => {

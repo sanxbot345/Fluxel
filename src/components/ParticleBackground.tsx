@@ -24,17 +24,17 @@ export default function ParticleBackground() {
       alphaSpeed: number;
     }> = [];
 
-    const numParticles = 40;
+    const numParticles = 65;
 
     for (let i = 0; i < numParticles; i++) {
       particles.push({
         x: Math.random() * width,
         y: Math.random() * height,
-        radius: Math.random() * 1.5 + 0.5,
-        vx: (Math.random() - 0.5) * 0.2,
-        vy: (Math.random() - 0.5) * 0.2,
-        alpha: Math.random(),
-        alphaSpeed: Math.random() * 0.01 + 0.002,
+        radius: Math.random() * 1.5 + 1.0,
+        vx: (Math.random() - 0.5) * 0.35,
+        vy: (Math.random() - 0.5) * 0.35,
+        alpha: Math.random() * 0.5 + 0.3,
+        alphaSpeed: Math.random() * 0.005 + 0.001,
       });
     }
 
@@ -63,38 +63,62 @@ export default function ParticleBackground() {
     const draw = () => {
       ctx.clearRect(0, 0, width, height);
 
-      // Render stars
+      // 1. Move and draw particles
       particles.forEach((p) => {
         p.x += p.vx;
         p.y += p.vy;
         p.alpha += p.alphaSpeed;
 
-        if (p.alpha > 0.8 || p.alpha < 0.1) {
+        if (p.alpha > 0.8 || p.alpha < 0.2) {
           p.alphaSpeed = -p.alphaSpeed;
         }
 
+        // Bounce on boundary
         if (p.x < 0 || p.x > width) p.vx = -p.vx;
         if (p.y < 0 || p.y > height) p.vy = -p.vy;
 
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255, 255, 255, ${Math.abs(p.alpha)})`;
+        ctx.fillStyle = `rgba(255, 255, 255, ${Math.abs(p.alpha) * 0.45})`;
         ctx.fill();
 
-        // Check proximity to mouse
+        // Connect particle to mouse if close
         const dx = p.x - mouse.x;
         const dy = p.y - mouse.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
 
-        if (dist < 120) {
+        if (dist < 150) {
           ctx.beginPath();
           ctx.moveTo(p.x, p.y);
           ctx.lineTo(mouse.x, mouse.y);
-          ctx.strokeStyle = `rgba(255, 255, 255, ${(1 - dist / 120) * 0.15})`;
-          ctx.lineWidth = 0.5;
+          ctx.strokeStyle = `rgba(16, 185, 129, ${(1 - dist / 150) * 0.25})`; // Subtle emerald glow for mouse connection
+          ctx.lineWidth = 0.75;
           ctx.stroke();
         }
       });
+
+      // 2. Build networked lines between nearby particles
+      for (let i = 0; i < particles.length; i++) {
+        const p1 = particles[i];
+        for (let j = i + 1; j < particles.length; j++) {
+          const p2 = particles[j];
+          const dx = p1.x - p2.x;
+          const dy = p1.y - p2.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          // Connection threshold (lines drawn if closer than 110 pixels)
+          if (dist < 110) {
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            // Opacity proportional to proximity
+            const opacity = (1 - dist / 110) * 0.12;
+            ctx.strokeStyle = `rgba(255, 255, 255, ${opacity})`;
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+          }
+        }
+      }
 
       animationGroupId = requestAnimationFrame(draw);
     };
