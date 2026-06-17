@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { ChevronDown, Check } from "lucide-react";
+import { useLanguage } from "../utils/lang";
 
 export interface FrameworkOption {
   value: string;
@@ -107,12 +108,52 @@ interface FrameworkDropdownProps {
 export default function FrameworkDropdown({ value, onChange }: FrameworkDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const { t } = useLanguage();
+
+  const getLocalizedOption = (opt: FrameworkOption) => {
+    switch (opt.value) {
+      case "detect":
+        return {
+          ...opt,
+          label: t.frameworkDetectOption,
+          description: t.frameworkDetectDescOption,
+        };
+      case "vite":
+        return {
+          ...opt,
+          label: t.frameworkViteOption,
+          description: t.frameworkViteDescOption,
+        };
+      case "nextjs":
+        return {
+          ...opt,
+          label: t.frameworkNextOption,
+          description: t.frameworkNextDescOption,
+        };
+      case "express":
+        return {
+          ...opt,
+          label: t.frameworkExpressOption,
+          description: t.frameworkExpressDescOption,
+        };
+      case "python":
+        return {
+          ...opt,
+          label: t.frameworkPythonOption,
+          description: t.frameworkPythonDescOption,
+        };
+      default:
+        return opt;
+    }
+  };
+
+  const localizedOptions = FRAMEWORK_OPTIONS.map(getLocalizedOption);
 
   // Fallback if current value is not in our list
   const currentOption =
-    FRAMEWORK_OPTIONS.find((opt) => opt.value === value) ||
-    FRAMEWORK_OPTIONS.find((opt) => opt.value === "detect") ||
-    FRAMEWORK_OPTIONS[0];
+    localizedOptions.find((opt) => opt.value === value) ||
+    localizedOptions.find((opt) => opt.value === "detect") ||
+    localizedOptions[0];
 
   // Close dropdown on outside focus click
   useEffect(() => {
@@ -137,7 +178,7 @@ export default function FrameworkDropdown({ value, onChange }: FrameworkDropdown
           <div className="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-lg bg-black/40">
             {currentOption.logo}
           </div>
-          <div className="flex items-center leading-none text-left">
+          <div className="flex items-center text-left">
             <span className="text-stone-200 font-semibold text-sm">{currentOption.label}</span>
           </div>
         </div>
@@ -147,7 +188,7 @@ export default function FrameworkDropdown({ value, onChange }: FrameworkDropdown
       {/* Floating Dropdown List Popover */}
       {isOpen && (
         <div className="absolute left-0 mt-2 w-full z-10 rounded-2xl border border-white/10 bg-stone-950/95 backdrop-blur-xl shadow-2xl p-2 animate-modal-entrance flex flex-col gap-1">
-          {FRAMEWORK_OPTIONS.map((option) => {
+          {localizedOptions.map((option) => {
             const isSelected = option.value === value;
             return (
               <div
@@ -164,7 +205,7 @@ export default function FrameworkDropdown({ value, onChange }: FrameworkDropdown
                   <div className="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-lg bg-black/40">
                     {option.logo}
                   </div>
-                  <div className="flex items-center leading-none">
+                  <div className="flex items-center">
                     <span className={`text-sm font-semibold ${isSelected ? "text-white" : "text-stone-300"}`}>
                       {option.label}
                     </span>

@@ -764,6 +764,10 @@ app.delete("/api/deploy/delete/:id", async (req, res) => {
     const vercelToken = resolveVercelToken(req.headers.authorization);
     const deploymentId = req.params.id;
 
+    if (!deploymentId || deploymentId === "undefined") {
+      return res.json({ success: true, message: "No active cloud deployment ID provided. Local item removed." });
+    }
+
     if (deploymentId.startsWith("srv-")) {
       const renderApiKey = process.env.RENDER_API_KEY;
       if (!renderApiKey) {
@@ -837,22 +841,28 @@ app.delete("/api/deploy/delete/:id", async (req, res) => {
     }
 
     // 3. Fallback/Complementary: Also delete the specific deployment directly to be absolutely sure Vercel reflects this
-    try {
-      const deleteResponse = await fetch(`https://api.vercel.com/v13/deployments/${deploymentId}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${vercelToken}`,
-        },
-      });
+    if (!projectDeleted) {
+      try {
+        const deleteResponse = await fetch(`https://api.vercel.com/v13/deployments/${deploymentId}`, {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${vercelToken}`,
+          },
+        });
 
-      const data = await deleteResponse.json().catch(() => ({}));
-      if (deleteResponse.ok) {
-        console.log(`Successfully deleted specific Vercel deployment: ${deploymentId}`);
-      } else {
-        console.warn(`Vercel deployment deletion returned non-2xx for ${deploymentId}:`, data);
+        const data = await deleteResponse.json().catch(() => ({}));
+        if (deleteResponse.ok) {
+          console.log(`Successfully deleted specific Vercel deployment: ${deploymentId}`);
+        } else {
+          if (deleteResponse.status === 404) {
+            console.log(`Deployment ${deploymentId} already deleted or not found.`);
+          } else {
+            console.warn(`Vercel deployment deletion returned non-2xx for ${deploymentId}:`, data);
+          }
+        }
+      } catch (e) {
+        console.error("Error during Vercel deployment deletion:", e);
       }
-    } catch (e) {
-      console.error("Error during Vercel deployment deletion:", e);
     }
 
     if (projectDeleted) {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 
 export type Language = "id" | "en";
 
@@ -101,6 +101,18 @@ export interface TranslationSchema {
 
   footerRights: string;
   footerDesc: string;
+
+  // Framework options localization
+  frameworkDetectOption: string;
+  frameworkDetectDescOption: string;
+  frameworkViteOption: string;
+  frameworkViteDescOption: string;
+  frameworkNextOption: string;
+  frameworkNextDescOption: string;
+  frameworkExpressOption: string;
+  frameworkExpressDescOption: string;
+  frameworkPythonOption: string;
+  frameworkPythonDescOption: string;
 }
 
 export const translations: Record<Language, TranslationSchema> = {
@@ -189,6 +201,18 @@ export const translations: Record<Language, TranslationSchema> = {
 
     footerRights: "© 2026 Fluxel Deployment. Hak cipta dilindungi undang-undang.",
     footerDesc: "Fluxel Deployment dikembangkan dan dikelola oleh Fluxel Deployment.",
+
+    // Framework options localization
+    frameworkDetectOption: "Deteksi Otomatis",
+    frameworkDetectDescOption: "Deteksi otomatis jenis proyek atau berkas statis",
+    frameworkViteOption: "Vite",
+    frameworkViteDescOption: "Vite (React, Vue, Svelte, dll.)",
+    frameworkNextOption: "Next.js",
+    frameworkNextDescOption: "Framework React NextJS",
+    frameworkExpressOption: "Express",
+    frameworkExpressDescOption: "Node.js Express Server",
+    frameworkPythonOption: "Python",
+    frameworkPythonDescOption: "Aplikasi Serverless Python",
   },
   en: {
     heroTitle: "Fluxel Deployment",
@@ -275,11 +299,31 @@ export const translations: Record<Language, TranslationSchema> = {
 
     footerRights: "© 2026 Fluxel Deployment. All rights reserved.",
     footerDesc: "Fluxel Deployment is developed and maintained by Fluxel Deployment.",
+
+    // Framework options localization
+    frameworkDetectOption: "Auto-Detect Framework",
+    frameworkDetectDescOption: "Automatically detect project type or static layout",
+    frameworkViteOption: "Vite",
+    frameworkViteDescOption: "Vite (React, Vue, Svelte, etc.)",
+    frameworkNextOption: "Next.js",
+    frameworkNextDescOption: "Framework React NextJS",
+    frameworkExpressOption: "Express",
+    frameworkExpressDescOption: "Node.js Express Server",
+    frameworkPythonOption: "Python",
+    frameworkPythonDescOption: "Python Serverless Application",
   }
 };
 
-// Hook to automatically detect and reactive-toggle application languages
-export function useLanguage() {
+interface LanguageContextType {
+  lang: Language;
+  toggleLanguage: () => void;
+  setLanguageManual: (newLang: Language) => void;
+  t: TranslationSchema;
+}
+
+const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+
+export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [lang, setLang] = useState<Language>(() => {
     try {
       const saved = localStorage.getItem("fluxel_language_preference");
@@ -319,10 +363,23 @@ export function useLanguage() {
 
   const t = translations[lang];
 
-  return {
-    lang,
-    toggleLanguage,
-    setLanguageManual,
-    t
-  };
+  return React.createElement(
+    LanguageContext.Provider,
+    { value: { lang, toggleLanguage, setLanguageManual, t } },
+    children
+  );
+}
+
+// Hook to automatically detect and reactive-toggle application languages
+export function useLanguage() {
+  const context = useContext(LanguageContext);
+  if (context === undefined) {
+    return {
+      lang: "en" as Language,
+      toggleLanguage: () => {},
+      setLanguageManual: () => {},
+      t: translations["en"]
+    };
+  }
+  return context;
 }
